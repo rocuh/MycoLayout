@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MycoDemo.FormsDemoPage">
+  <ListView ItemsSource="{Binding Items}" HasUnevenRows="true">
+    <ListView.ItemTemplate>
+      <DataTemplate>
+        <ViewCell>
+          <Grid Padding="5,5,5,5">
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto"/>
+              <RowDefinition Height="Auto"/>
+              <RowDefinition Height="Auto"/>
+              <RowDefinition Height="Auto"/>
+              <RowDefinition Height="Auto"/>
+              <RowDefinition Height="Auto"/>
+              <RowDefinition Height="Auto"/>
+              <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="50" />
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" TextColor="#333333" Text="{Binding Text}" FontSize="20" FontAttributes="Bold" VerticalTextAlignment="Center" />
+
+            <!--<Image Grid.Row="1" Grid.Column="0" Grid.RowSpan="3" Source="folder.png" HeightRequest="50"/>-->
+
+            <Label Grid.Row="1" Grid.Column="1" TextColor="#333333" FontSize="12" Text="{Binding Labels[0].Header}" IsVisible="{Binding Labels[0].Enabled}"/>
+            <Label Grid.Row="1" Grid.Column="2" TextColor="#333333" FontSize="12" Text="{Binding Labels[0].Value}" HorizontalTextAlignment="End" IsVisible="{Binding Labels[0].Enabled}"/>
+
+            <Label Grid.Row="2" Grid.Column="1" TextColor="#333333" FontSize="12" Text="{Binding Labels[1].Header}" IsVisible="{Binding Labels[1].Enabled}"/>
+            <Label Grid.Row="2" Grid.Column="2" TextColor="#333333" FontSize="12" Text="{Binding Labels[1].Value}" HorizontalTextAlignment="End" IsVisible="{Binding Labels[1].Enabled}"/>
+
+            <Label Grid.Row="3" Grid.Column="1" TextColor="#333333" FontSize="12" Text="{Binding Labels[2].Header}" IsVisible="{Binding Labels[2].Enabled}"/>
+            <Label Grid.Row="3" Grid.Column="2" TextColor="#333333" FontSize="12" Text="{Binding Labels[2].Value}" HorizontalTextAlignment="End" IsVisible="{Binding Labels[2].Enabled}"/>
+
+            <Label Grid.Row="4" Grid.Column="1" TextColor="#333333" FontSize="12" Text="{Binding Labels[3].Header}" IsVisible="{Binding Labels[3].Enabled}"/>
+            <Label Grid.Row="4" Grid.Column="2" TextColor="#333333" FontSize="12" Text="{Binding Labels[3].Value}" HorizontalTextAlignment="End" IsVisible="{Binding Labels[3].Enabled}"/>
+
+            <Label Grid.Row="5" Grid.Column="1" TextColor="#333333" FontSize="12" Text="{Binding Labels[4].Header}" IsVisible="{Binding Labels[4].Enabled}"/>
+            <Label Grid.Row="5" Grid.Column="2" TextColor="#333333" FontSize="12" Text="{Binding Labels[4].Value}" HorizontalTextAlignment="End" IsVisible="{Binding Labels[4].Enabled}"/>
+
+            <Label Grid.Row="6" Grid.Column="1" TextColor="#333333" FontSize="12" Text="{Binding Labels[5].Header}" IsVisible="{Binding Labels[5].Enabled}"/>
+            <Label Grid.Row="6" Grid.Column="2" TextColor="#333333" FontSize="12" Text="{Binding Labels[5].Value}" HorizontalTextAlignment="End" IsVisible="{Binding Labels[5].Enabled}"/>
+
+            <Label Grid.Row="7" Grid.Column="1" TextColor="#333333" FontSize="12" Text="{Binding Labels[6].Header}" IsVisible="{Binding Labels[6].Enabled}"/>
+            <Label Grid.Row="7" Grid.Column="2" TextColor="#333333" FontSize="12" Text="{Binding Labels[6].Value}" HorizontalTextAlignment="End" IsVisible="{Binding Labels[6].Enabled}"/>
+
+          </Grid>
+
+        </ViewCell>
+      </DataTemplate>
+    </ListView.ItemTemplate>
+  </ListView>
+</ContentPage>

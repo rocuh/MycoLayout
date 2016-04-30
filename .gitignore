@@ -1,0 +1,11 @@
+.vs/
+packages/
+Debug/
+ipch/
+obj/
+bin/
+Output/
+*.sdf
+UpgradeLog.htm
+buildlog.log
+*.opendb

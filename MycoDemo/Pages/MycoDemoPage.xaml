@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MycoDemo.MycoDemoPage"
+             xmlns:ml="clr-namespace:Myco;assembly=Myco">
+  <ListView ItemsSource="{Binding Items}" HasUnevenRows="true">
+    <ListView.ItemTemplate>
+      <DataTemplate>
+        <ViewCell>
+          <ml:MycoContainer>
+            <ml:MycoGrid Padding="5,5,5,5">              
+              <ml:MycoGrid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+              </ml:MycoGrid.RowDefinitions>
+
+              <ml:MycoGrid.ColumnDefinitions>
+                <ColumnDefinition Width="50" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+              </ml:MycoGrid.ColumnDefinitions>
+
+              <ml:MycoLabel ml:MycoGrid.Row="0" ml:MycoGrid.Column="0" ml:MycoGrid.ColumnSpan="3" TextColor="#333333" Text="{Binding Text}" FontSize="20" FontAttributes="Bold" VerticalTextAlignment="Center" />
+
+              <!--<ml:MycoImage ml:MycoGrid.Row="1" ml:MycoGrid.Column="0" ml:MycoGrid.RowSpan="3" Source="folder.png" HeightRequest="50"/>-->
+              
+              <ml:MycoLabel ml:MycoGrid.Row="1" ml:MycoGrid.Column="1" TextColor="#333333" FontSize="12" Text="{Binding Labels[0].Header}" IsVisible="{Binding Labels[0].Enabled}"/>
+              <ml:MycoLabel ml:MycoGrid.Row="1" ml:MycoGrid.Column="2" TextColor="#333333" FontSize="12" Text="{Binding Labels[0].Value}" HorizontalTextAlignment="End" IsVisible="{Binding Labels[0].Enabled}"/>
+
+              <ml:MycoLabel ml:MycoGrid.Row="2" ml:MycoGrid.Column="1" TextColor="#333333" FontSize="12" Text="{Binding Labels[1].Header}" IsVisible="{Binding Labels[1].Enabled}"/>
+              <ml:MycoLabel ml:MycoGrid.Row="2" ml:MycoGrid.Column="2" TextColor="#333333" FontSize="12" Text="{Binding Labels[1].Value}" HorizontalTextAlignment="End" IsVisible="{Binding Labels[1].Enabled}"/>
+
+              <ml:MycoLabel ml:MycoGrid.Row="3" ml:MycoGrid.Column="1" TextColor="#333333" FontSize="12" Text="{Binding Labels[2].Header}" IsVisible="{Binding Labels[2].Enabled}"/>
+              <ml:MycoLabel ml:MycoGrid.Row="3" ml:MycoGrid.Column="2" TextColor="#333333" FontSize="12" Text="{Binding Labels[2].Value}" HorizontalTextAlignment="End" IsVisible="{Binding Labels[2].Enabled}"/>
+
+              <ml:MycoLabel ml:MycoGrid.Row="4" ml:MycoGrid.Column="1" TextColor="#333333" FontSize="12" Text="{Binding Labels[3].Header}" IsVisible="{Binding Labels[3].Enabled}"/>
+              <ml:MycoLabel ml:MycoGrid.Row="4" ml:MycoGrid.Column="2" TextColor="#333333" FontSize="12" Text="{Binding Labels[3].Value}" HorizontalTextAlignment="End" IsVisible="{Binding Labels[3].Enabled}"/>
+
+              <ml:MycoLabel ml:MycoGrid.Row="5" ml:MycoGrid.Column="1" TextColor="#333333" FontSize="12" Text="{Binding Labels[4].Header}" IsVisible="{Binding Labels[4].Enabled}"/>
+              <ml:MycoLabel ml:MycoGrid.Row="5" ml:MycoGrid.Column="2" TextColor="#333333" FontSize="12" Text="{Binding Labels[4].Value}" HorizontalTextAlignment="End" IsVisible="{Binding Labels[4].Enabled}"/>
+
+              <ml:MycoLabel ml:MycoGrid.Row="6" ml:MycoGrid.Column="1" TextColor="#333333" FontSize="12" Text="{Binding Labels[5].Header}" IsVisible="{Binding Labels[5].Enabled}"/>
+              <ml:MycoLabel ml:MycoGrid.Row="6" ml:MycoGrid.Column="2" TextColor="#333333" FontSize="12" Text="{Binding Labels[5].Value}" HorizontalTextAlignment="End" IsVisible="{Binding Labels[5].Enabled}"/>
+
+              <ml:MycoLabel ml:MycoGrid.Row="7" ml:MycoGrid.Column="1" TextColor="#333333" FontSize="12" Text="{Binding Labels[6].Header}" IsVisible="{Binding Labels[6].Enabled}"/>
+              <ml:MycoLabel ml:MycoGrid.Row="7" ml:MycoGrid.Column="2" TextColor="#333333" FontSize="12" Text="{Binding Labels[6].Value}" HorizontalTextAlignment="End" IsVisible="{Binding Labels[6].Enabled}"/>
+
+            </ml:MycoGrid>
+          </ml:MycoContainer>          
+        </ViewCell>        
+      </DataTemplate>
+    </ListView.ItemTemplate>
+  </ListView>
+</ContentPage>
