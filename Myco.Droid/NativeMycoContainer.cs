@@ -24,7 +24,6 @@ namespace Myco.Droid
             _listener = new MycoGestureListener(context);
             _detector = new GestureDetector(_listener);
 
-            this.GenericMotion += HandleGenericMotion;
             this.Touch += HandleTouch;
         }
 
@@ -64,7 +63,6 @@ namespace Myco.Droid
         {
             if (disposing && _bitmap != null)
             {
-                this.GenericMotion -= HandleGenericMotion;
                 this.Touch -= HandleTouch;
 
                 _bitmap.Dispose();
@@ -114,15 +112,10 @@ namespace Myco.Droid
         {
             Invalidate();
         }
-
-        private void HandleGenericMotion(object sender, GenericMotionEventArgs e)
-        {
-            _detector.OnTouchEvent(e.Event);
-        }
-
+        
         private void HandleTouch(object sender, TouchEventArgs e)
         {
-            _detector.OnTouchEvent(e.Event);
+            e.Handled = _detector.OnTouchEvent(e.Event);
         }
 
         #endregion Methods

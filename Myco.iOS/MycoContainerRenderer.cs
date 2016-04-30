@@ -40,6 +40,8 @@ namespace Myco.iOS
                 SetNativeControl(nativeSkContainer);
 
                 _tapGesture = new UITapGestureRecognizer(HandleTap);
+                _tapGesture.ShouldReceiveTouch += ValidateTap;
+
                 this.AddGestureRecognizer(_tapGesture);
             }
 
@@ -47,6 +49,8 @@ namespace Myco.iOS
             {
                 if (_tapGesture != null)
                 {
+                    _tapGesture.ShouldReceiveTouch -= ValidateTap;
+
                     RemoveGestureRecognizer(_tapGesture);
                 }
             }
@@ -61,6 +65,31 @@ namespace Myco.iOS
             Control.SetNeedsDisplay();
         }
 
+        private bool ValidateTap(UIGestureRecognizer tap, UITouch touch)
+        {
+            var gestureRecognizers = new List<Tuple<MycoView, MycoGestureRecognizer>>();
+
+            var location = touch.LocationInView(Control);
+
+            Element.GetGestureRecognizers(new Xamarin.Forms.Point(location.X, location.Y), gestureRecognizers);
+
+            bool gestureHandled = false;
+
+            if (gestureRecognizers.Count > 0)
+            {
+                foreach (var gestureRecognizer in gestureRecognizers)
+                {
+                    var tapGesture = gestureRecognizer.Item2 as MycoTapGestureRecognizer;
+
+                    if (tapGesture != null && tapGesture.NumberOfTapsRequired == 1)
+                    {
+                        gestureHandled = true;
+                    }
+                }
+            }
+
+            return gestureHandled;
+        }
 
         private void HandleTap(UITapGestureRecognizer tap)
         {

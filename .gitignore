@@ -9,3 +9,4 @@ Output/
 UpgradeLog.htm
 buildlog.log
 *.opendb
+*.user

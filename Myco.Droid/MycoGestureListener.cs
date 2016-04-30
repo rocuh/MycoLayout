@@ -43,11 +43,37 @@ namespace Myco.Droid
 
         #region Methods
 
+        public override bool OnDown(MotionEvent e)
+        {
+            var gestureRecognizers = new List<Tuple<MycoView, MycoGestureRecognizer>>();
+
+            _container.GetGestureRecognizers(new Xamarin.Forms.Point(_context.FromPixels(e.GetX()), _context.FromPixels(e.GetY())), gestureRecognizers);
+
+            bool gestureHandled = false;
+
+            if (gestureRecognizers.Count > 0)
+            {
+                foreach (var gestureRecognizer in gestureRecognizers)
+                {
+                    var tapGesture = gestureRecognizer.Item2 as MycoTapGestureRecognizer;
+
+                    if (tapGesture != null && tapGesture.NumberOfTapsRequired == 1)
+                    {
+                        gestureHandled = true;
+                    }
+                }
+            }
+
+            return gestureHandled;
+        }
+
         public override bool OnSingleTapUp(MotionEvent e)
         {
             var gestureRecognizers = new List<Tuple<MycoView, MycoGestureRecognizer>>();
 
             _container.GetGestureRecognizers(new Xamarin.Forms.Point(_context.FromPixels(e.GetX()), _context.FromPixels(e.GetY())), gestureRecognizers);
+
+            bool gestureHandled = false;
 
             if (gestureRecognizers.Count > 0)
             {
@@ -58,11 +84,12 @@ namespace Myco.Droid
                     if (tapGesture != null && tapGesture.NumberOfTapsRequired == 1)
                     {
                         tapGesture.SendTapped(gestureRecognizer.Item1);
+                        gestureHandled = true;
                     }
                 }
             }
 
-            return base.OnSingleTapUp(e);
+            return gestureHandled;
         }
 
         #endregion Methods
