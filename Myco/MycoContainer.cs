@@ -110,7 +110,7 @@ namespace Myco
 
             if (Content != null)
             {
-                Content.BindingContext = BindingContext;
+                Content.SetInheritedBindingContextReflect(BindingContext);
             }
         }
 

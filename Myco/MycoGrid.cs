@@ -343,7 +343,17 @@ namespace Myco
 
             foreach (var child in Children)
             {
-                child.BindingContext = BindingContext;
+                child.SetInheritedBindingContextReflect(BindingContext);
+            }
+
+            foreach (var row in RowDefinitions)
+            {
+                row.SetInheritedBindingContextReflect(BindingContext);
+            }
+
+            foreach (var column in ColumnDefinitions)
+            {
+                column.SetInheritedBindingContextReflect(BindingContext);
             }
         }
 
@@ -357,8 +367,25 @@ namespace Myco
             columnSpacing = new double[ColumnDefinitions.Count];
             rowSpacing = new double[RowDefinitions.Count];
 
-            var contentWidths = new double[ColumnDefinitions.Count];
-            var contentHeights = new double[RowDefinitions.Count];
+            // if column or row has no content we dont add in spacing
+            var columnHasContent = new bool[ColumnDefinitions.Count];
+            var rowHasContent = new bool[RowDefinitions.Count];
+
+            for (int c = 0; c < ColumnDefinitions.Count; c++)
+            {
+                if (ColumnDefinitions[c].Width.IsAbsolute)
+                {
+                    columnWidths[c] = ColumnDefinitions[c].Width.Value;
+                }
+            }
+
+            for (int r = 0; r < RowDefinitions.Count; r++)
+            {
+                if (RowDefinitions[r].Height.IsAbsolute)
+                {
+                    rowHeights[r] = RowDefinitions[r].Height.Value;
+                }
+            }
 
             foreach (var child in Children)
             {
@@ -381,15 +408,11 @@ namespace Myco
                 // determine autosize widths and heights
                 for (int c = column; c < column + columnSpan; c++)
                 {
+                    columnHasContent[c] = true;
+
                     if (ColumnDefinitions[c].Width.IsAuto && allAutoSizeColunn)
                     {
-                        contentWidths[c] = Math.Max(size.Width, contentWidths[c]);
                         columnWidths[c] = Math.Max(columnWidths[c], Double.IsPositiveInfinity(size.Width) ? 0 : (size.Width / columnSpan));
-                    }
-                    else if (ColumnDefinitions[c].Width.IsAbsolute)
-                    {
-                        contentWidths[c] = Math.Max(ColumnDefinitions[c].Width.Value, contentWidths[c]);
-                        columnWidths[c] = ColumnDefinitions[c].Width.Value;
                     }
                 }
 
@@ -405,15 +428,11 @@ namespace Myco
 
                 for (int r = row; r < row + rowSpan; r++)
                 {
+                    rowHasContent[r] = true;
+
                     if (RowDefinitions[r].Height.IsAuto && allAutoSizeRow)
                     {
-                        contentHeights[r] = Math.Max(size.Height, contentHeights[r]);
                         rowHeights[r] = Math.Max(rowHeights[r], Double.IsPositiveInfinity(size.Height) ? 0 : (size.Height / rowSpan));
-                    }
-                    else if (RowDefinitions[r].Height.IsAbsolute)
-                    {
-                        contentHeights[r] = Math.Max(RowDefinitions[r].Height.Value, contentHeights[r]);
-                        rowHeights[r] = RowDefinitions[r].Height.Value;
                     }
                 }
             }
@@ -422,7 +441,7 @@ namespace Myco
             // it can still have a column width as a view may span into it
             for (int c = 0; c < ColumnDefinitions.Count; c++)
             {
-                if (c > 0 && (contentWidths[c] > 0 || ColumnDefinitions[c].Width.IsStar))
+                if (c > 0 && columnHasContent[c])
                 {
                     columnWidths[c] += ColumnSpacing;
                     columnSpacing[c] = ColumnSpacing;
@@ -433,7 +452,7 @@ namespace Myco
             // it can still have a row height as a view may span into it
             for (int r = 0; r < RowDefinitions.Count; r++)
             {
-                if (r > 0 && (contentHeights[r] > 0 || RowDefinitions[r].Height.IsStar))
+                if (r > 0 && rowHasContent[r])
                 {
                     rowHeights[r] += RowSpacing;
                     rowSpacing[r] = RowSpacing;
