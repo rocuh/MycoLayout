@@ -118,7 +118,7 @@ namespace Myco
         {
             if (Content != null)
             {
-                Content.Layout(Bounds);
+                Content.Layout(new Rectangle(0,0, Bounds.Width, Bounds.Height));
             }
         }
 

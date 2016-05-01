@@ -311,7 +311,7 @@ namespace Myco
                     bottom = top + size.Height;
                 }
 
-                child.Layout(new Rectangle(left, top, (right - left) + 1, (bottom - top) + 1));
+                child.Layout(new Rectangle(left, top, (right - left), (bottom - top)));
             }
         }
 
