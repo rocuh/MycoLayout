@@ -11,13 +11,10 @@ namespace Myco.iOS
 
         private const int BitmapInfo = ((int)CGBitmapFlags.ByteOrder32Big) | ((int)CGImageAlphaInfo.PremultipliedLast);
 
-        private MycoContainer _mycoContainer;
-
-        private int _bufferHeight;
-
-        private int _bufferWidth;
-
         private IntPtr _buff = IntPtr.Zero;
+        private int _bufferHeight;
+        private int _bufferWidth;
+        private MycoContainer _mycoContainer;
 
         #endregion Fields
 
@@ -30,6 +27,15 @@ namespace Myco.iOS
         }
 
         #endregion Constructors
+
+        #region Destructors
+
+        ~NativeMycoContainer()
+        {
+            Dispose(false);
+        }
+
+        #endregion Destructors
 
         #region Properties
 
@@ -115,7 +121,7 @@ namespace Myco.iOS
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && _buff != IntPtr.Zero)
+            if (_buff != IntPtr.Zero)
             {
                 System.Runtime.InteropServices.Marshal.FreeCoTaskMem(_buff);
                 _buff = IntPtr.Zero;
@@ -128,7 +134,6 @@ namespace Myco.iOS
         {
             SetNeedsDisplay();
         }
-
 
         #endregion Methods
     }

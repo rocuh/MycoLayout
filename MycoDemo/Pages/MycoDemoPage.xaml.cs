@@ -14,5 +14,11 @@ namespace MycoDemo
         {
             InitializeComponent();
         }
+
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+            BindingContext = null;
+        }
     }
 }

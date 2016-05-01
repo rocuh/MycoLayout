@@ -1,3 +1,5 @@
+using Android.Widget;
+using System;
 using System.ComponentModel;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
@@ -8,6 +10,8 @@ namespace Myco.Droid
 {
     public class MycoContainerRenderer : ViewRenderer<MycoContainer, NativeMycoContainer>
     {
+        private bool _disposed;
+
         #region Constructors
 
         public MycoContainerRenderer()
@@ -30,7 +34,7 @@ namespace Myco.Droid
                 SetNativeControl(nativeSkContainer);
             }
 
-            if (e.OldElement != null)
+            if (e.NewElement != null && e.OldElement != null)
             {
                 e.NewElement.Layout(e.OldElement.Bounds);
                 (e.NewElement as IMycoController).SendLayout();
@@ -38,6 +42,17 @@ namespace Myco.Droid
 
             Control.Container = e.NewElement;
             Control.Invalidate();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && !_disposed && Control != null)
+            {
+                Control.Container = null;
+                _disposed = true;
+            }
+
+            base.Dispose(disposing);
         }
 
         protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)

@@ -14,6 +14,7 @@ namespace Myco.Droid
         private GestureDetector _detector;
         private MycoGestureListener _listener;
         private MycoContainer _mycoContainer;
+        private bool disposed = false;
 
         #endregion Fields
 
@@ -23,8 +24,6 @@ namespace Myco.Droid
         {
             _listener = new MycoGestureListener(context);
             _detector = new GestureDetector(_listener);
-
-            this.Touch += HandleTouch;
         }
 
         #endregion Constructors
@@ -43,6 +42,7 @@ namespace Myco.Droid
                 if (_mycoContainer != null)
                 {
                     _mycoContainer.InvalidateNative -= _skContainer_InvalidateNative;
+                    this.Touch -= HandleTouch;
                 }
 
                 _mycoContainer = value;
@@ -50,6 +50,7 @@ namespace Myco.Droid
 
                 if (_mycoContainer != null)
                 {
+                    this.Touch += HandleTouch;
                     _mycoContainer.InvalidateNative += _skContainer_InvalidateNative;
                 }
             }
@@ -61,12 +62,18 @@ namespace Myco.Droid
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && _bitmap != null)
+            if (disposing && !disposed)
             {
-                this.Touch -= HandleTouch;
+                _detector.Dispose();
+                _detector = null;
 
+                _listener.Dispose();
+                _listener = null;
+                                
                 _bitmap.Dispose();
                 _bitmap = null;
+
+                disposed = true;
             }
 
             base.Dispose(disposing);

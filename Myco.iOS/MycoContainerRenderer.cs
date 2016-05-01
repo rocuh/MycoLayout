@@ -11,7 +11,11 @@ namespace Myco.iOS
 {
     public class MycoContainerRenderer : ViewRenderer<MycoContainer, NativeMycoContainer>
     {
+        #region Fields
+
         private UITapGestureRecognizer _tapGesture;
+
+        #endregion Fields
 
         #region Constructors
 
@@ -20,7 +24,7 @@ namespace Myco.iOS
         }
 
         #endregion Constructors
-        
+
         #region Methods
 
         public static void Initialize()
@@ -32,8 +36,6 @@ namespace Myco.iOS
         {
             base.OnElementChanged(e);
 
-            var oldControl = Control;
-
             if (Control == null)
             {
                 var nativeSkContainer = new NativeMycoContainer();
@@ -41,8 +43,7 @@ namespace Myco.iOS
 
                 _tapGesture = new UITapGestureRecognizer(HandleTap);
                 _tapGesture.ShouldReceiveTouch += ValidateTap;
-
-                this.AddGestureRecognizer(_tapGesture);
+                AddGestureRecognizer(_tapGesture);
             }
 
             if (e.NewElement == null)
@@ -50,19 +51,50 @@ namespace Myco.iOS
                 if (_tapGesture != null)
                 {
                     _tapGesture.ShouldReceiveTouch -= ValidateTap;
-
                     RemoveGestureRecognizer(_tapGesture);
+                    _tapGesture = null;
                 }
             }
-
-            if (e.OldElement != null)
+            else if (e.OldElement != null)
             {
                 e.NewElement.Layout(e.OldElement.Bounds);
                 (e.NewElement as IMycoController).SendLayout();
             }
-            
+
             Control.Container = e.NewElement;
             Control.SetNeedsDisplay();
+        }
+
+        protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            base.OnElementPropertyChanged(sender, e);
+
+            if (e.PropertyName == MycoContainer.ContentProperty.PropertyName && Control != null)
+            {
+                Control.SetNeedsDisplay();
+            }
+        }
+
+        private void HandleTap(UITapGestureRecognizer tap)
+        {
+            var gestureRecognizers = new List<Tuple<MycoView, MycoGestureRecognizer>>();
+
+            var location = tap.LocationInView(Control);
+
+            Element.GetGestureRecognizers(new Xamarin.Forms.Point(location.X, location.Y), gestureRecognizers);
+
+            if (gestureRecognizers.Count > 0)
+            {
+                foreach (var gestureRecognizer in gestureRecognizers)
+                {
+                    var tapGesture = gestureRecognizer.Item2 as MycoTapGestureRecognizer;
+
+                    if (tapGesture != null && tapGesture.NumberOfTapsRequired == 1)
+                    {
+                        tapGesture.SendTapped(gestureRecognizer.Item1);
+                    }
+                }
+            }
         }
 
         private bool ValidateTap(UIGestureRecognizer tap, UITouch touch)
@@ -89,38 +121,6 @@ namespace Myco.iOS
             }
 
             return gestureHandled;
-        }
-
-        private void HandleTap(UITapGestureRecognizer tap)
-        {
-            var gestureRecognizers = new List<Tuple<MycoView, MycoGestureRecognizer>>();
-
-            var location = tap.LocationInView(Control);
-
-            Element.GetGestureRecognizers(new Xamarin.Forms.Point(location.X, location.Y), gestureRecognizers);
-
-            if (gestureRecognizers.Count > 0)
-            {
-                foreach (var gestureRecognizer in gestureRecognizers)
-                {
-                    var tapGesture = gestureRecognizer.Item2 as MycoTapGestureRecognizer;
-
-                    if (tapGesture != null && tapGesture.NumberOfTapsRequired == 1)
-                    {
-                        tapGesture.SendTapped(gestureRecognizer.Item1);
-                    }
-                }
-            }
-        }
-
-        protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            base.OnElementPropertyChanged(sender, e);
-
-            if (e.PropertyName == MycoContainer.ContentProperty.PropertyName)
-            {
-                Control.SetNeedsDisplay();
-            }
         }
 
         #endregion Methods
