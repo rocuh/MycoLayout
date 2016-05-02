@@ -5,5 +5,7 @@
   <StackLayout>
     <Button Text="Xamarin Forms Many Views ViewCell" Command="{Binding ShowXamarinFormsCommand}"/>
     <Button Text="Myco Many Views ViewCell" Command="{Binding ShowMycoCommand}"/>
+    <Button Text="Myco Paging View" Command="{Binding ShowPagingViewCommand}"/>
+    <Button Text="Myco Paging Layout" Command="{Binding ShowPagingLayoutCommand}"/>
   </StackLayout>
 </ContentPage>

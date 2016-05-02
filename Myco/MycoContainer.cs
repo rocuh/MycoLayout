@@ -100,7 +100,7 @@ namespace Myco
 
             if (Content != null)
             {
-                Content.Draw(canvas);
+                Content.Render(canvas);
             }
         }
 

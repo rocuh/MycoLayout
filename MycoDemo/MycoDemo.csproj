@@ -38,12 +38,20 @@
     <Compile Include="App.cs" />
     <Compile Include="PageModels\FormsDemoPageModel.cs" />
     <Compile Include="PageModels\LaunchPageModel.cs" />
+    <Compile Include="PageModels\MycoPagingViewPageModel.cs" />
+    <Compile Include="PageModels\MycoPagingLayoutPageModel.cs" />
     <Compile Include="PageModels\MycoDemoPageModel.cs" />
     <Compile Include="Pages\FormsDemoPage.xaml.cs">
       <DependentUpon>FormsDemoPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\LaunchPage.xaml.cs">
       <DependentUpon>LaunchPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\MycoPagingViewPage.xaml.cs">
+      <DependentUpon>MycoPagingViewPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\MycoPagingLayoutPage.xaml.cs">
+      <DependentUpon>MycoPagingLayoutPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\MycoDemoPage.xaml.cs">
       <DependentUpon>MycoDemoPage.xaml</DependentUpon>
@@ -95,6 +103,18 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Pages\MycoDemoPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Pages\MycoPagingLayoutPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Pages\MycoPagingViewPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
       <SubType>Designer</SubType>
     </EmbeddedResource>

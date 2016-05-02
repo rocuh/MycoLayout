@@ -42,7 +42,6 @@ namespace Myco.Droid
                 if (_mycoContainer != null)
                 {
                     _mycoContainer.InvalidateNative -= _skContainer_InvalidateNative;
-                    this.Touch -= HandleTouch;
                 }
 
                 _mycoContainer = value;
@@ -50,7 +49,6 @@ namespace Myco.Droid
 
                 if (_mycoContainer != null)
                 {
-                    this.Touch += HandleTouch;
                     _mycoContainer.InvalidateNative += _skContainer_InvalidateNative;
                 }
             }
@@ -115,15 +113,21 @@ namespace Myco.Droid
             (_mycoContainer as IMycoController).SendLayout();
         }
 
+        public override bool OnTouchEvent(MotionEvent e)
+        {
+            return _detector.OnTouchEvent(e);
+        }
+
+        public override bool OnGenericMotionEvent(MotionEvent e)
+        {
+            return _detector.OnTouchEvent(e);
+        }
+
         private void _skContainer_InvalidateNative(object sender, EventArgs e)
         {
             Invalidate();
         }
         
-        private void HandleTouch(object sender, TouchEventArgs e)
-        {
-            e.Handled = _detector.OnTouchEvent(e.Event);
-        }
 
         #endregion Methods
     }

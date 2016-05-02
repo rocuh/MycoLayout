@@ -13,6 +13,8 @@ namespace Myco.iOS
     {
         #region Fields
 
+        private UISwipeGestureRecognizer _swipeGestureLeft;
+        private UISwipeGestureRecognizer _swipeGestureRight;
         private UITapGestureRecognizer _tapGesture;
 
         #endregion Fields
@@ -42,17 +44,41 @@ namespace Myco.iOS
                 SetNativeControl(nativeSkContainer);
 
                 _tapGesture = new UITapGestureRecognizer(HandleTap);
-                _tapGesture.ShouldReceiveTouch += ValidateTap;
+                _tapGesture.ShouldReceiveTouch += ValidateTouch;
                 AddGestureRecognizer(_tapGesture);
+
+                _swipeGestureLeft = new UISwipeGestureRecognizer(HandleSwipe);
+                _swipeGestureLeft.Direction = UISwipeGestureRecognizerDirection.Left;
+                _swipeGestureLeft.ShouldReceiveTouch += ValidateTouch;
+                AddGestureRecognizer(_swipeGestureLeft);
+
+                _swipeGestureRight = new UISwipeGestureRecognizer(HandleSwipe);
+                _swipeGestureRight.Direction = UISwipeGestureRecognizerDirection.Right;
+                _swipeGestureRight.ShouldReceiveTouch += ValidateTouch;
+                AddGestureRecognizer(_swipeGestureRight);
             }
 
             if (e.NewElement == null)
             {
                 if (_tapGesture != null)
                 {
-                    _tapGesture.ShouldReceiveTouch -= ValidateTap;
+                    _tapGesture.ShouldReceiveTouch -= ValidateTouch;
                     RemoveGestureRecognizer(_tapGesture);
                     _tapGesture = null;
+                }
+
+                if (_swipeGestureLeft != null)
+                {
+                    _swipeGestureLeft.ShouldReceiveTouch -= ValidateTouch;
+                    RemoveGestureRecognizer(_swipeGestureLeft);
+                    _swipeGestureLeft = null;
+                }
+
+                if (_swipeGestureRight != null)
+                {
+                    _swipeGestureRight.ShouldReceiveTouch -= ValidateTouch;
+                    RemoveGestureRecognizer(_swipeGestureRight);
+                    _swipeGestureRight = null;
                 }
             }
             else if (e.OldElement != null)
@@ -75,6 +101,34 @@ namespace Myco.iOS
             }
         }
 
+        private void HandleSwipe(UISwipeGestureRecognizer swipe)
+        {
+            var gestureRecognizers = new List<Tuple<MycoView, MycoGestureRecognizer>>();
+
+            var location = swipe.LocationInView(Control);
+
+            Element.GetGestureRecognizers(new Xamarin.Forms.Point(location.X, location.Y), gestureRecognizers);
+
+            foreach (var gestureRecognizer in gestureRecognizers)
+            {
+                var swipeGesture = gestureRecognizer.Item2 as MycoSwipeGestureRecognizer;
+
+                if (swipeGesture != null)
+                {
+                    switch (swipe.Direction)
+                    {
+                        case UISwipeGestureRecognizerDirection.Left:
+                            swipeGesture.SendSwipeLeft(gestureRecognizer.Item1);
+                            break;
+
+                        case UISwipeGestureRecognizerDirection.Right:
+                            swipeGesture.SendSwipeRight(gestureRecognizer.Item1);
+                            break;
+                    }
+                }
+            }
+        }
+
         private void HandleTap(UITapGestureRecognizer tap)
         {
             var gestureRecognizers = new List<Tuple<MycoView, MycoGestureRecognizer>>();
@@ -83,21 +137,18 @@ namespace Myco.iOS
 
             Element.GetGestureRecognizers(new Xamarin.Forms.Point(location.X, location.Y), gestureRecognizers);
 
-            if (gestureRecognizers.Count > 0)
+            foreach (var gestureRecognizer in gestureRecognizers)
             {
-                foreach (var gestureRecognizer in gestureRecognizers)
-                {
-                    var tapGesture = gestureRecognizer.Item2 as MycoTapGestureRecognizer;
+                var tapGesture = gestureRecognizer.Item2 as MycoTapGestureRecognizer;
 
-                    if (tapGesture != null && tapGesture.NumberOfTapsRequired == 1)
-                    {
-                        tapGesture.SendTapped(gestureRecognizer.Item1);
-                    }
+                if (tapGesture != null && tapGesture.NumberOfTapsRequired == 1)
+                {
+                    tapGesture.SendTapped(gestureRecognizer.Item1);
                 }
             }
         }
 
-        private bool ValidateTap(UIGestureRecognizer tap, UITouch touch)
+        private bool ValidateTouch(UIGestureRecognizer tap, UITouch touch)
         {
             var gestureRecognizers = new List<Tuple<MycoView, MycoGestureRecognizer>>();
 
@@ -107,16 +158,20 @@ namespace Myco.iOS
 
             bool gestureHandled = false;
 
-            if (gestureRecognizers.Count > 0)
+            foreach (var gestureRecognizer in gestureRecognizers)
             {
-                foreach (var gestureRecognizer in gestureRecognizers)
-                {
-                    var tapGesture = gestureRecognizer.Item2 as MycoTapGestureRecognizer;
+                var tapGesture = gestureRecognizer.Item2 as MycoTapGestureRecognizer;
 
-                    if (tapGesture != null && tapGesture.NumberOfTapsRequired == 1)
-                    {
-                        gestureHandled = true;
-                    }
+                if (tapGesture != null && tapGesture.NumberOfTapsRequired == 1)
+                {
+                    gestureHandled = true;
+                }
+
+                var swipeGesture = gestureRecognizer.Item2 as MycoSwipeGestureRecognizer;
+
+                if (swipeGesture != null)
+                {
+                    gestureHandled = true;
                 }
             }
 

@@ -122,7 +122,7 @@ namespace Myco
             return (int)bindable.GetValue(MycoGrid.RowSpanProperty);
         }
 
-        public override void Draw(SKCanvas canvas)
+        protected override void Draw(SKCanvas canvas)
         {
             base.Draw(canvas);
 
@@ -131,13 +131,15 @@ namespace Myco
 
             foreach (var child in Children)
             {
-                child.Draw(canvas);
+                child.Render(canvas);
             }
         }
 
         public override void GetGestureRecognizers(Point gestureStart, IList<Tuple<MycoView, MycoGestureRecognizer>> matches)
         {
-            if (Bounds.Contains(gestureStart))
+            base.GetGestureRecognizers(gestureStart, matches);
+
+            if (RenderBounds.Contains(gestureStart))
             {
                 foreach (var child in Children)
                 {

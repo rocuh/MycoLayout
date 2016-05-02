@@ -146,7 +146,7 @@ namespace Myco
 
         #region Methods
 
-        public override void Draw(SKCanvas canvas)
+        protected override void Draw(SKCanvas canvas)
         {
             base.Draw(canvas);
 

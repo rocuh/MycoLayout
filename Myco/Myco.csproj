@@ -38,8 +38,12 @@
     <Compile Include="BindableObjectExtensions.cs" />
     <Compile Include="IMycoController.cs" />
     <Compile Include="IMycoImageSource.cs" />
+    <Compile Include="MycoPagingLayout.cs" />
+    <Compile Include="MycoPagingView.cs" />
+    <Compile Include="MycoContentView.cs" />
     <Compile Include="MycoGestureRecognizer.cs" />
     <Compile Include="MycoImageButton.cs" />
+    <Compile Include="MycoSwipeGestureRecognizer.cs" />
     <Compile Include="MycoTapGestureRecognizer.cs" />
     <Compile Include="MycoViewExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

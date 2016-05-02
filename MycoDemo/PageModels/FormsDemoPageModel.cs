@@ -1,15 +1,14 @@
 ﻿using FreshMvvm;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xamarin.Forms;
 
 namespace MycoDemo
 {
     public class FormsDemoPageModel : FreshBasePageModel
     {
+        #region Constructors
+
         public FormsDemoPageModel()
         {
             Random r = new Random(12345);
@@ -36,21 +35,9 @@ namespace MycoDemo
             }
         }
 
-        public class ListItem
-        {
-            public string Text { get; set; }
+        #endregion Constructors
 
-            public List<LabelItem> Labels { get; set; } = new List<LabelItem>();
-        }
-
-        public class LabelItem
-        {
-            public bool Enabled { get; set; }
-            public string Header { get; set; }
-            public string Value { get; set; }
-        }
-
-        public List<ListItem> Items { get; } = new List<ListItem>();
+        #region Properties
 
         public Command FolderCommand
         {
@@ -58,9 +45,37 @@ namespace MycoDemo
             {
                 return new Command(() =>
                 {
-
                 });
             }
         }
+
+        public List<ListItem> Items { get; } = new List<ListItem>();
+
+        #endregion Properties
+
+        #region Classes
+
+        public class LabelItem
+        {
+            #region Properties
+
+            public bool Enabled { get; set; }
+            public string Header { get; set; }
+            public string Value { get; set; }
+
+            #endregion Properties
+        }
+
+        public class ListItem
+        {
+            #region Properties
+
+            public List<LabelItem> Labels { get; set; } = new List<LabelItem>();
+            public string Text { get; set; }
+
+            #endregion Properties
+        }
+
+        #endregion Classes
     }
 }

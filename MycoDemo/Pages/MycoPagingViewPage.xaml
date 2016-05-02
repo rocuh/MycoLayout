@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MycoDemo.MycoPagingViewPage"
+             xmlns:ml="clr-namespace:Myco;assembly=Myco">
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+    </Grid.ColumnDefinitions>
+
+    <ml:MycoContainer Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+      <ml:MycoPagingView x:Name="Carousel" ItemsSource="{Binding Items}">
+        <ml:MycoPagingView.ItemTemplate>
+          <DataTemplate>
+            <ml:MycoLabel Text="{Binding Text}" FontSize="30" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"/>
+          </DataTemplate>
+        </ml:MycoPagingView.ItemTemplate>
+      </ml:MycoPagingView>
+    </ml:MycoContainer>
+    
+    <Button x:Name="PrevButton" Grid.Row="1" Grid.Column="0" Text="Prev"/>
+    <Button x:Name="NextButton" Grid.Row="1" Grid.Column="1" Text="Next"/>
+
+  </Grid>
+</ContentPage>

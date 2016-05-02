@@ -9,6 +9,7 @@ namespace Myco
     {
         #region Fields
 
+        public static readonly BindableProperty IsClippedToBoundsProperty = BindableProperty.Create(nameof(IsClippedToBounds), typeof(bool), typeof(MycoView), false, BindingMode.OneWay);
         public static readonly BindableProperty BackgroundColorProperty = BindableProperty.Create(nameof(BackgroundColor), typeof(Color), typeof(MycoView), Color.Transparent);                
         public static readonly BindableProperty HorizontalOptionsProperty = BindableProperty.Create(nameof(HorizontalOptions), typeof(LayoutOptions), typeof(MycoView), LayoutOptions.Fill);
         public static readonly BindableProperty IsVisibleProperty = BindableProperty.Create(nameof(IsVisible), typeof(bool), typeof(MycoView), true, BindingMode.OneWay);
@@ -32,7 +33,7 @@ namespace Myco
         public static readonly BindablePropertyKey HeightPropertyKey = BindableProperty.CreateReadOnly(nameof(Height), typeof(double), typeof(MycoView), 0.0, BindingMode.OneWayToSource);
         public static readonly BindableProperty HeightProperty = HeightPropertyKey.BindableProperty;
 
-        private readonly List<MycoTapGestureRecognizer> _gestureRecognizers = new List<MycoTapGestureRecognizer>();
+        private readonly List<MycoGestureRecognizer> _gestureRecognizers = new List<MycoGestureRecognizer>();
         private MycoContainer _container;
         private MycoView _parent;
 
@@ -73,7 +74,7 @@ namespace Myco
             }
         }
 
-        public IList<MycoTapGestureRecognizer> GestureRecognizers
+        public IList<MycoGestureRecognizer> GestureRecognizers
         {
             get { return _gestureRecognizers; }
         }
@@ -126,6 +127,18 @@ namespace Myco
             }
         }
 
+        public bool IsClippedToBounds
+        {
+            get
+            {
+                return (bool)GetValue(MycoView.IsClippedToBoundsProperty);
+            }
+            set
+            {
+                SetValue(MycoView.IsClippedToBoundsProperty, value);
+            }
+        }
+
         public Thickness Margin
         {
             get
@@ -151,21 +164,89 @@ namespace Myco
             }
         }
 
+        public double InheritiedScale
+        {
+            get
+            {
+                if (Parent != null)
+                {
+                    return Scale * Parent.InheritiedScale;
+                }
+
+                return 1;
+            }
+        }
+
+        public double InheritiedTranslationX
+        {
+            get
+            {
+                if (Parent != null)
+                {
+                    return TranslationX + Parent.InheritiedTranslationX;
+                }
+
+                return 0;
+            }
+        }
+
+        public double InheritiedTranslationY
+        {
+            get
+            {
+                if (Parent != null)
+                {
+                    return TranslationY + Parent.InheritiedTranslationY;
+                }
+
+                return 0;
+            }
+        }
+
+        public double InheritedX
+        {
+            get
+            {
+                if (Parent != null)
+                {
+                    return X + Parent.X;
+                }
+
+                return 0;
+            }
+        }
+
+        public double InheritedY
+        {
+            get
+            {
+                if (Parent != null)
+                {
+                    return Y + Parent.Y;
+                }
+
+                return 0;
+            }
+        }
+
         public Rectangle RenderBounds
         {
             get
             {
-                var bounds = Bounds;
+                var totalScale = InheritiedScale;
+                var totalTranslationX = InheritiedTranslationX;
+                var totalTranslationY = InheritiedTranslationY;
+                var totalX = InheritedX;
+                var totalY = InheritedY;
 
-                var scaleW = bounds.Width * Scale;
-                var scaleH = bounds.Height * Scale;
+                var scaleW = Width * totalScale;
+                var scaleH = Height * totalScale;
 
-                var scaled = Bounds.Inflate((scaleW - bounds.Width) / 2.0, (scaleH - bounds.Height) / 2.0);
-
-                scaled.X += TranslationX;
-                scaled.Y += TranslationY;
-
-                return scaled;
+                return new Rectangle(
+                    totalX + totalTranslationX - ((scaleW - Width) / 2.0),
+                    totalY + totalTranslationY - ((scaleH - Height) / 2.0),
+                    scaleW,
+                    scaleH);
             }
         }
 
@@ -278,7 +359,25 @@ namespace Myco
             Invalidate();
         }
 
-        public virtual void Draw(SKCanvas canvas)
+        public void Render(SKCanvas canvas)
+        {
+            int canvasState = 0;
+
+            if (IsClippedToBounds)
+            {
+                canvasState = canvas.Save();
+                canvas.ClipRect(RenderBounds.ToSKRect());
+            }
+
+            Draw(canvas);
+
+            if (IsClippedToBounds)
+            {
+                canvas.RestoreToCount(canvasState);
+            }
+        }
+
+        protected virtual void Draw(SKCanvas canvas)
         {
             if (!IsVisible)
                 return;
@@ -288,14 +387,14 @@ namespace Myco
                 using (var paint = new SKPaint())
                 {
                     paint.Color = BackgroundColor.ToSKColor();
-                    canvas.DrawRect(Bounds.ToSKRect(), paint);
+                    canvas.DrawRect(RenderBounds.ToSKRect(), paint);
                 }
             }
         }
 
         public virtual void GetGestureRecognizers(Point gestureStart, IList<Tuple<MycoView, MycoGestureRecognizer>> matches)
         {
-            if (Bounds.Contains(gestureStart))
+            if (RenderBounds.Contains(gestureStart))
             {
                 foreach (var gesture in _gestureRecognizers)
                 {
