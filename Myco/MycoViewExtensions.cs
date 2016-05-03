@@ -55,6 +55,27 @@ namespace Myco
             return tcs.Task;
         }
 
+        public static Task<bool> FadeTo(this MycoView view, double opacity, uint length = 250, Easing easing = null)
+        {
+            if (view == null)
+                throw new ArgumentNullException("mycoview");
+            if (easing == null)
+                easing = Easing.Linear;
+
+            var tcs = new TaskCompletionSource<bool>();
+            var weakView = new WeakReference<MycoView>(view);
+            Action<double> fade = f =>
+            {
+                MycoView v;
+                if (weakView.TryGetTarget(out v))
+                    v.Opacity = f;
+            };
+
+            new Animation(fade, view.Opacity, opacity, easing).Commit(view, "FadeTo", 16, length, finished: (f, a) => tcs.SetResult(a));
+
+            return tcs.Task;
+        }
+
         #endregion Methods
     }
 }

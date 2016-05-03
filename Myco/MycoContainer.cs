@@ -24,6 +24,9 @@ namespace Myco
                 }
             });
 
+        private int _surfaceWidth;
+        private int _surfaceHeight;
+
         #endregion Fields
 
         #region Constructors
@@ -58,7 +61,7 @@ namespace Myco
 
         #region Methods
 
-        public void GetGestureRecognizers(Point gestureStart, IList<Tuple<MycoView, MycoGestureRecognizer>> matches)
+        void IMycoController.GetGestureRecognizers(Point gestureStart, IList<Tuple<MycoView, MycoGestureRecognizer>> matches)
         {
             if (Content != null)
             {
@@ -76,6 +79,12 @@ namespace Myco
             return base.GetSizeRequest(widthConstraint, heightConstraint);
         }
 
+        void IMycoController.SendSurfaceSize(int width, int height)
+        {
+            _surfaceWidth = width;
+            _surfaceHeight = height;
+        }
+
         void IMycoController.SendDraw(SKCanvas canvas)
         {
             Draw(canvas);
@@ -83,7 +92,7 @@ namespace Myco
 
         void IMycoController.SendLayout()
         {
-            SKLayout();
+            InternalLayout();
         }
 
         public void Invalidate()
@@ -100,7 +109,7 @@ namespace Myco
 
             if (Content != null)
             {
-                Content.Render(canvas);
+                Content.Draw(canvas);
             }
         }
 
@@ -114,12 +123,18 @@ namespace Myco
             }
         }
 
-        protected virtual void SKLayout()
+        protected virtual void InternalLayout()
         {
             if (Content != null)
             {
                 Content.Layout(new Rectangle(0,0, Bounds.Width, Bounds.Height));
             }
+        }
+
+        public SKSurface CreateOpacitySurface()
+        {
+            // transparency will be slow!
+            return SKSurface.Create(new SKImageInfo(_surfaceWidth, _surfaceHeight, SKColorType.Rgba_8888, SKAlphaType.Opaque));
         }
 
         #endregion Methods

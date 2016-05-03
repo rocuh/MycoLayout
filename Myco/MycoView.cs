@@ -33,6 +33,8 @@ namespace Myco
         public static readonly BindablePropertyKey HeightPropertyKey = BindableProperty.CreateReadOnly(nameof(Height), typeof(double), typeof(MycoView), 0.0, BindingMode.OneWayToSource);
         public static readonly BindableProperty HeightProperty = HeightPropertyKey.BindableProperty;
 
+        public static readonly BindableProperty OpacityProperty = BindableProperty.Create(nameof(OpacityProperty), typeof(double), typeof(MycoView), 1.0);
+
         private readonly List<MycoGestureRecognizer> _gestureRecognizers = new List<MycoGestureRecognizer>();
         private MycoContainer _container;
         private MycoView _parent;
@@ -41,6 +43,8 @@ namespace Myco
 
         #region Properties
 
+        public Action<SKCanvas> Drawing { get; set; }
+        
         public Color BackgroundColor
         {
             get
@@ -229,6 +233,27 @@ namespace Myco
             }
         }
 
+        public double Opacity
+        {
+            get
+
+            {
+                return (double)GetValue(OpacityProperty);
+            }
+            set
+            {
+                SetValue(OpacityProperty, value);
+            }
+        }
+
+        public bool IsOpaque
+        {
+            get
+            {
+                return Math.Abs(Opacity - 1.0) < 0.0001;
+            }
+        }
+
         public Rectangle RenderBounds
         {
             get
@@ -359,29 +384,49 @@ namespace Myco
             Invalidate();
         }
 
-        public void Render(SKCanvas canvas)
-        {
-            int canvasState = 0;
-
-            if (IsClippedToBounds)
-            {
-                canvasState = canvas.Save();
-                canvas.ClipRect(RenderBounds.ToSKRect());
-            }
-
-            Draw(canvas);
-
-            if (IsClippedToBounds)
-            {
-                canvas.RestoreToCount(canvasState);
-            }
-        }
-
-        protected virtual void Draw(SKCanvas canvas)
+        public void Draw(SKCanvas canvas)
         {
             if (!IsVisible)
                 return;
 
+            int canvasState = -1;
+
+            if (IsOpaque)
+            {
+
+                if (IsClippedToBounds)
+                {
+                    canvasState = canvas.Save();
+                    canvas.ClipRect(RenderBounds.ToSKRect());
+                }
+
+                InternalDraw(canvas);
+
+                if (IsClippedToBounds)
+                    canvas.RestoreToCount(canvasState);
+            }
+            else
+            {
+                using (var surface = GetSKContainer().CreateOpacitySurface())
+                {
+                    if (IsClippedToBounds)
+                    {
+                        surface.Canvas.ClipRect(RenderBounds.ToSKRect());
+                    }
+
+                    InternalDraw(surface.Canvas);
+
+                    using (var paint = new SKPaint())
+                    {
+                        paint.Color = new SKColor(255, 255, 255, (byte)(255.0 * Opacity));
+                        canvas.DrawImage(surface.Snapshot(), 0, 0, paint);
+                    }
+                }
+            }
+        }
+
+        protected virtual void InternalDraw(SKCanvas canvas)
+        {
             if (BackgroundColor.A > 0)
             {
                 using (var paint = new SKPaint())
@@ -389,6 +434,11 @@ namespace Myco
                     paint.Color = BackgroundColor.ToSKColor();
                     canvas.DrawRect(RenderBounds.ToSKRect(), paint);
                 }
+            }
+
+            if (Drawing != null)
+            {
+                Drawing(canvas);
             }
         }
 
@@ -423,7 +473,23 @@ namespace Myco
             }
         }
 
-        public virtual void Layout(Rectangle rectangle)
+        public void Layout(Rectangle rectangle)
+        {
+            if (!IsVisible)
+                return;
+
+            InternalLayout(rectangle);
+        }
+
+        public Size SizeRequest(double widthConstraint, double heightConstaint)
+        {
+            if (!IsVisible)
+                return new Size(0, 0);
+
+            return InternalSizeRequest(widthConstraint, heightConstaint);
+        }
+
+        protected virtual void InternalLayout(Rectangle rectangle)
         {
             X = rectangle.X;
             Y = rectangle.Y;
@@ -431,11 +497,8 @@ namespace Myco
             Height = rectangle.Height;
         }
 
-        public virtual Size SizeRequest(double widthConstraint, double heightConstaint)
+        protected virtual Size InternalSizeRequest(double widthConstraint, double heightConstaint)
         {
-            if (!IsVisible)
-                return new Size(0, 0);
-
             return new Size(
                 WidthRequest >= 0 ? (Double.IsPositiveInfinity(widthConstraint) ? WidthRequest : Math.Min(WidthRequest, widthConstraint)) : widthConstraint,
                 HeightRequest >= 0 ? (Double.IsPositiveInfinity(heightConstaint) ? HeightRequest : Math.Min(HeightRequest, heightConstaint)) : heightConstaint);
@@ -444,6 +507,7 @@ namespace Myco
         protected override void OnBindingContextChanged()
         {
             base.OnBindingContextChanged();
+
             Invalidate();
         }
 

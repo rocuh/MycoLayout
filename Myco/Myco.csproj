@@ -43,6 +43,7 @@
     <Compile Include="MycoContentView.cs" />
     <Compile Include="MycoGestureRecognizer.cs" />
     <Compile Include="MycoImageButton.cs" />
+    <Compile Include="MycoPanGestureRecognizer.cs" />
     <Compile Include="MycoSwipeGestureRecognizer.cs" />
     <Compile Include="MycoTapGestureRecognizer.cs" />
     <Compile Include="MycoViewExtensions.cs" />

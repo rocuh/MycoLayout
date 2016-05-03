@@ -42,43 +42,37 @@ namespace Myco.Droid
 
                         var id = Android.App.Application.Context.Resources.GetIdentifier(fileId, "drawable", Android.App.Application.Context.PackageName);
 
+                        const int bytesPerPixel = 4;
+
                         BitmapFactory.Options opts = new BitmapFactory.Options { InPreferredConfig = Bitmap.Config.Argb8888 };
 
                         using (var nativeBitmap = BitmapFactory.DecodeResource(Android.App.Application.Context.Resources, id, opts))
                         {
-                            var pixelLength = nativeBitmap.Height * nativeBitmap.Width;
-                            var pixelInts = new int[pixelLength];
-
-                            nativeBitmap.GetPixels(pixelInts, 0, nativeBitmap.Width, 0, 0, nativeBitmap.Width, nativeBitmap.Height);
-
-                            // seems that r & b are inverted from skia sharp and android SKColorType, which is odd since skia is the backend for android...
-                            // really would be nice if you could load from resource directly from skiasharp, this is not fast...
-                            for (int i = 0; i < pixelLength; i++)
+                            int size = nativeBitmap.Width * nativeBitmap .Height * bytesPerPixel;
+                            var pixelData = new byte[size];
+                            using (var byteBuffer = Java.Nio.ByteBuffer.AllocateDirect(size))
                             {
-                                byte a = (byte)((pixelInts[i] >> 24) & 0xFF);
-                                byte r = (byte)((pixelInts[i] >> 16) & 0xFF);
-                                byte g = (byte)((pixelInts[i] >> 8) & 0xFF);
-                                byte b = (byte)((pixelInts[i] >> 0) & 0xFF);
-
-                                pixelInts[i] = (a << 24) | (b << 16) | (g << 8) | r;
+                                nativeBitmap.CopyPixelsToBuffer(byteBuffer);
+                                Marshal.Copy(byteBuffer.GetDirectBufferAddress(), pixelData, 0, size);
                             }
 
-                            bitmap = new SKBitmap(nativeBitmap.Width, nativeBitmap.Height, SKColorType.Rgba_8888, SKAlphaType.Opaque);
+                            bitmap = new SKBitmap(nativeBitmap.Width, nativeBitmap.Height, SKColorType.Rgba_8888, SKAlphaType.Premul);
 
                             IntPtr length;
 
                             bitmap.LockPixels();
                             try
                             {
+                                // wish there was a way to IntPtr to IntPtr copy
                                 var pixels = bitmap.GetPixels(out length);
-
-                                Marshal.Copy(pixelInts, 0, pixels, nativeBitmap.Width * nativeBitmap.Height);
+                                Marshal.Copy(pixelData, 0, pixels, size);
                             }
                             finally
                             {
                                 bitmap.UnlockPixels();
                             }
                         }
+                        
 
                         if (bitmap != null)
                         {

@@ -36,7 +36,7 @@ namespace Myco
 
         #region Properties
 
-        public ObservableCollection<MycoView> Children { get; } = new ObservableCollection<MycoView>();
+        public GridElementCollection Children { get; } = new GridElementCollection();
 
         public IList<ColumnDefinition> ColumnDefinitions
         {
@@ -100,7 +100,39 @@ namespace Myco
 
         #endregion Properties
 
+        public class GridElementCollection : ObservableCollection<MycoView>
+        {
+            public void Add(MycoView view, int column, int row, int columnSpan = 1, int rowSpan = 1)
+            {
+                SetColumn(view, column);
+                SetRow(view, row);
+                SetColumnSpan(view, columnSpan);
+                SetRowSpan(view, rowSpan);
+                base.Add(view);
+            }
+        }
+
         #region Methods
+
+        public static void SetColumn(BindableObject bindable, int value)
+        {
+            bindable.SetValue(ColumnProperty, value);
+        }
+
+        public static void SetColumnSpan(BindableObject bindable, int value)
+        {
+            bindable.SetValue(ColumnSpanProperty, value);
+        }
+
+        public static void SetRow(BindableObject bindable, int value)
+        {
+            bindable.SetValue(RowProperty, value);
+        }
+
+        public static void SetRowSpan(BindableObject bindable, int value)
+        {
+            bindable.SetValue(RowSpanProperty, value);
+        }
 
         public static int GetColumn(BindableObject bindable)
         {
@@ -122,16 +154,13 @@ namespace Myco
             return (int)bindable.GetValue(MycoGrid.RowSpanProperty);
         }
 
-        protected override void Draw(SKCanvas canvas)
+        protected override void InternalDraw(SKCanvas canvas)
         {
-            base.Draw(canvas);
-
-            if (!IsVisible)
-                return;
+            base.InternalDraw(canvas);
 
             foreach (var child in Children)
             {
-                child.Render(canvas);
+                child.Draw(canvas);
             }
         }
 
@@ -148,12 +177,9 @@ namespace Myco
             }
         }
 
-        public override void Layout(Rectangle rectangle)
+        protected override void InternalLayout(Rectangle rectangle)
         {
-            base.Layout(rectangle);
-
-            if (!IsVisible)
-                return;
+            base.InternalLayout(rectangle);
 
             double embeddedWidth, embeddedHeight;
             double[] columnWidths;
@@ -317,12 +343,9 @@ namespace Myco
             }
         }
 
-        public override Size SizeRequest(double widthConstraint, double heightConstaint)
+        protected override Size InternalSizeRequest(double widthConstraint, double heightConstaint)
         {
-            if (!IsVisible)
-                return new Size(0, 0);
-
-            var size = base.SizeRequest(widthConstraint, heightConstaint);
+            var size = base.InternalSizeRequest(widthConstraint, heightConstaint);
 
             double embeddedWidth, embeddedHeight;
             double[] columnWidths;

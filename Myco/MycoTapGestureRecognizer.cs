@@ -16,7 +16,7 @@ namespace Myco
 
         #region Events
 
-        public event EventHandler Tapped;
+        public event EventHandler<TapEventArgs> Tapped;
 
         #endregion Events
 
@@ -62,7 +62,7 @@ namespace Myco
 
         #region Methods
 
-        public void SendTapped(MycoView view)
+        public void SendTapped(MycoView view, double x, double y)
         {
             if (Command != null)
             {
@@ -70,9 +70,29 @@ namespace Myco
             }
 
             if (Tapped != null)
-                Tapped(view, new EventArgs());
+                Tapped(view, new TapEventArgs(x, y));
         }
 
         #endregion Methods
+    }
+
+    public class TapEventArgs : EventArgs
+    {
+        #region Constructors
+
+        public TapEventArgs(double x, double y)
+        {
+            X = x;
+            Y = y;
+        }
+
+        #endregion Constructors
+
+        #region Properties
+
+        public double X { get; private set; }
+        public double Y { get; private set; }
+
+        #endregion Properties
     }
 }

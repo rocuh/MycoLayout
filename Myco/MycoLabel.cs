@@ -146,12 +146,9 @@ namespace Myco
 
         #region Methods
 
-        protected override void Draw(SKCanvas canvas)
+        protected override void InternalDraw(SKCanvas canvas)
         {
-            base.Draw(canvas);
-
-            if (!IsVisible)
-                return;
+            base.InternalDraw(canvas);
 
             if (!String.IsNullOrEmpty(Text))
             {
@@ -206,12 +203,9 @@ namespace Myco
             }
         }
 
-        public override Size SizeRequest(double widthConstraint, double heightConstaint)
+        protected override Size InternalSizeRequest(double widthConstraint, double heightConstaint)
         {
-            if (!IsVisible)
-                return new Size(0, 0);
-
-            var size = base.SizeRequest(widthConstraint, heightConstaint);
+            var size = base.InternalSizeRequest(widthConstraint, heightConstaint);
 
             if (!String.IsNullOrEmpty(Text))
             {

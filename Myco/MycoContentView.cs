@@ -28,9 +28,9 @@ namespace Myco
             }
         }
 
-        public override void Layout(Rectangle rectangle)
+        protected override void InternalLayout(Rectangle rectangle)
         {
-            base.Layout(rectangle);
+            base.InternalLayout(rectangle);
 
             if (Content != null)
             {

@@ -102,7 +102,7 @@ namespace Myco
         public async Task AnimateToPage(int index)
         {
             // really animate to new page ?
-            if (index >= 0 && index < Children.Count && _visiblePageIndex != index)
+            if (index >= 0 && index < Children.Count && _visiblePageIndex != index && _nextView == null)
             {
                 // get animation direction
                 var translation = _visiblePageIndex < index ? Width : -Width;
@@ -133,6 +133,9 @@ namespace Myco
 
                 // null out old view
                 oldView.IsVisible = false;
+
+                // allow next animation
+                _nextView = null;
             }
         }
 
@@ -149,9 +152,9 @@ namespace Myco
             }
         }
 
-        public override void Layout(Rectangle rectangle)
+        protected override void InternalLayout(Rectangle rectangle)
         {
-            base.Layout(rectangle);
+            base.InternalLayout(rectangle);
 
             foreach (MycoView child in Children)
             {
@@ -159,13 +162,13 @@ namespace Myco
             }
         }
 
-        protected override void Draw(SKCanvas canvas)
+        protected override void InternalDraw(SKCanvas canvas)
         {
-            base.Draw(canvas);
+            base.InternalDraw(canvas);
 
             foreach (MycoView child in Children)
             {
-                child.Render(canvas);
+                child.Draw(canvas);
             }
         }
 

@@ -85,6 +85,8 @@ namespace Myco.iOS
 
                 _bufferWidth = width;
                 _bufferHeight = height;
+
+                (_mycoContainer as IMycoController).SendSurfaceSize(width, height);
             }
 
             using (var surface = SKSurface.Create(width, height, SKColorType.N_32, SKAlphaType.Premul, _buff, width * 4))

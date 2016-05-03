@@ -16,6 +16,9 @@ namespace Myco.Droid
         private IMycoController _container;
         private Context _context;
 
+        private MycoView _activePanView;
+        private MycoPanGestureRecognizer _activePanGesture;
+
         #endregion Fields
 
         #region Constructors
@@ -58,16 +61,48 @@ namespace Myco.Droid
             {
                 var tapGesture = gestureRecognizer.Item2 as MycoTapGestureRecognizer;
 
-                if (tapGesture != null && tapGesture.NumberOfTapsRequired == 1)
+                if (tapGesture != null)
                 {
+                    if (tapGesture.NumberOfTapsRequired == 1)
+                    {
+                        gestureHandled = true;
+                    }
+                }
+                else
+                {
+                    // pan and swipe always handle
                     gestureHandled = true;
                 }
+            }
 
-                var swipeGesture = gestureRecognizer.Item2 as MycoSwipeGestureRecognizer;
+            return gestureHandled;
+        }
 
-                if (swipeGesture != null)
+
+        public override bool OnScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY)
+        {
+            var gestureRecognizers = new List<Tuple<MycoView, MycoGestureRecognizer>>();
+
+            _container.GetGestureRecognizers(new Xamarin.Forms.Point(_context.FromPixels(e1.GetX()), _context.FromPixels(e1.GetY())), gestureRecognizers);
+
+            bool gestureHandled = false;
+
+            foreach (var gestureRecognizer in gestureRecognizers)
+            {
+                var panGesture = gestureRecognizer.Item2 as MycoPanGestureRecognizer;
+
+                if (panGesture != null)
                 {
-                    gestureHandled = true;
+                    if (_activePanGesture == null)
+                    {
+                        _activePanView = gestureRecognizer.Item1;
+                        _activePanGesture = panGesture;
+                        panGesture.SendPanStarted(gestureRecognizer.Item1);
+                    }
+                    else
+                    {
+                        panGesture.SendPanUpdated(gestureRecognizer.Item1, distanceY, distanceY);
+                    }
                 }
             }
 
@@ -133,12 +168,27 @@ namespace Myco.Droid
 
                 if (tapGesture != null && tapGesture.NumberOfTapsRequired == 1)
                 {
-                    tapGesture.SendTapped(gestureRecognizer.Item1);
+                    tapGesture.SendTapped(gestureRecognizer.Item1, e.GetX() - gestureRecognizer.Item1.RenderBounds.X, e.GetY() -gestureRecognizer.Item1.RenderBounds.Y);
                     gestureHandled = true;
                 }
             }
 
             return gestureHandled;
+        }
+
+        public bool OnUp(MotionEvent e)
+        {
+            if (_activePanGesture != null)
+            {
+                _activePanGesture.SendPanCompleted(_activePanView);
+
+                _activePanGesture = null;
+                _activePanView = null;
+
+                return true;
+            }
+
+            return false;
         }
 
         #endregion Methods

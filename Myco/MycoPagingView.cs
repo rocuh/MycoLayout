@@ -142,9 +142,9 @@ namespace Myco
             }
         }
 
-        public override void Layout(Rectangle rectangle)
+        protected override void InternalLayout(Rectangle rectangle)
         {
-            base.Layout(rectangle);
+            base.InternalLayout(rectangle);
 
             if (_currentView != null)
             {
@@ -157,18 +157,18 @@ namespace Myco
             }
         }
 
-        protected override void Draw(SKCanvas canvas)
+        protected override void InternalDraw(SKCanvas canvas)
         {
-            base.Draw(canvas);
+            base.InternalDraw(canvas);
 
             if (_currentView != null)
             {
-                _currentView.Render(canvas);
+                _currentView.Draw(canvas);
             }
 
             if (_nextView != null)
             {
-                _nextView.Render(canvas);
+                _nextView.Draw(canvas);
             }
         }
 

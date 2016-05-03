@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using UIKit;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.iOS;
@@ -16,6 +17,7 @@ namespace Myco.iOS
         private UISwipeGestureRecognizer _swipeGestureLeft;
         private UISwipeGestureRecognizer _swipeGestureRight;
         private UITapGestureRecognizer _tapGesture;
+        private UIPanGestureRecognizer _panGesture;
 
         #endregion Fields
 
@@ -56,6 +58,9 @@ namespace Myco.iOS
                 _swipeGestureRight.Direction = UISwipeGestureRecognizerDirection.Right;
                 _swipeGestureRight.ShouldReceiveTouch += ValidateTouch;
                 AddGestureRecognizer(_swipeGestureRight);
+
+                _panGesture = new UIPanGestureRecognizer(HandlePan);
+                AddGestureRecognizer(_panGesture);
             }
 
             if (e.NewElement == null)
@@ -107,7 +112,7 @@ namespace Myco.iOS
 
             var location = swipe.LocationInView(Control);
 
-            Element.GetGestureRecognizers(new Xamarin.Forms.Point(location.X, location.Y), gestureRecognizers);
+            (Element as IMycoController).GetGestureRecognizers(new Xamarin.Forms.Point(location.X, location.Y), gestureRecognizers);
 
             foreach (var gestureRecognizer in gestureRecognizers)
             {
@@ -129,13 +134,47 @@ namespace Myco.iOS
             }
         }
 
+        private void HandlePan(UIPanGestureRecognizer pan)
+        {
+            var gestureRecognizers = new List<Tuple<MycoView, MycoGestureRecognizer>>();
+
+            var location = pan.LocationInView(Control);
+
+            (Element as IMycoController).GetGestureRecognizers(new Xamarin.Forms.Point(location.X, location.Y), gestureRecognizers);
+
+            foreach (var gestureRecognizer in gestureRecognizers)
+            {
+                var panGesture = gestureRecognizer.Item2 as MycoPanGestureRecognizer;
+
+                if (panGesture != null)
+                {
+                    switch (pan.State)
+                    {
+                        case UIGestureRecognizerState.Began:
+                            panGesture.SendPanStarted(gestureRecognizer.Item1);
+                            break;
+                        case UIGestureRecognizerState.Changed:
+                            var offset = pan.TranslationInView(Control);
+                            panGesture.SendPanUpdated(gestureRecognizer.Item1, offset.X, offset.Y);
+                            break;
+                        case UIGestureRecognizerState.Ended:
+                            panGesture.SendPanCompleted(gestureRecognizer.Item1);
+                            break;
+                        case UIGestureRecognizerState.Cancelled:
+                            panGesture.SendPanCancelled(gestureRecognizer.Item1);
+                            break;
+                    }
+                }
+            }
+        }
+
         private void HandleTap(UITapGestureRecognizer tap)
         {
             var gestureRecognizers = new List<Tuple<MycoView, MycoGestureRecognizer>>();
 
             var location = tap.LocationInView(Control);
 
-            Element.GetGestureRecognizers(new Xamarin.Forms.Point(location.X, location.Y), gestureRecognizers);
+            (Element as IMycoController).GetGestureRecognizers(new Xamarin.Forms.Point(location.X, location.Y), gestureRecognizers);
 
             foreach (var gestureRecognizer in gestureRecognizers)
             {
@@ -143,7 +182,7 @@ namespace Myco.iOS
 
                 if (tapGesture != null && tapGesture.NumberOfTapsRequired == 1)
                 {
-                    tapGesture.SendTapped(gestureRecognizer.Item1);
+                    tapGesture.SendTapped(gestureRecognizer.Item1, location.X - gestureRecognizer.Item1.RenderBounds.X, location.Y - -gestureRecognizer.Item1.RenderBounds.Y);
                 }
             }
         }
@@ -154,7 +193,7 @@ namespace Myco.iOS
 
             var location = touch.LocationInView(Control);
 
-            Element.GetGestureRecognizers(new Xamarin.Forms.Point(location.X, location.Y), gestureRecognizers);
+            (Element as IMycoController).GetGestureRecognizers(new Xamarin.Forms.Point(location.X, location.Y), gestureRecognizers);
 
             bool gestureHandled = false;
 
@@ -162,17 +201,18 @@ namespace Myco.iOS
             {
                 var tapGesture = gestureRecognizer.Item2 as MycoTapGestureRecognizer;
 
-                if (tapGesture != null && tapGesture.NumberOfTapsRequired == 1)
+                if (tapGesture != null)
+                {
+                    if (tapGesture.NumberOfTapsRequired == 1)
+                    {
+                        gestureHandled = true;
+                    }
+                }
+                else
                 {
                     gestureHandled = true;
                 }
-
-                var swipeGesture = gestureRecognizer.Item2 as MycoSwipeGestureRecognizer;
-
-                if (swipeGesture != null)
-                {
-                    gestureHandled = true;
-                }
+                
             }
 
             return gestureHandled;

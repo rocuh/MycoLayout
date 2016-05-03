@@ -87,6 +87,8 @@ namespace Myco.Droid
                     _bitmap.Dispose();
 
                 _bitmap = Bitmap.CreateBitmap(canvas.Width, canvas.Height, Bitmap.Config.Argb8888);
+
+                (_mycoContainer as IMycoController).SendSurfaceSize(canvas.Width, canvas.Height);
             }
 
             try
@@ -115,7 +117,17 @@ namespace Myco.Droid
 
         public override bool OnTouchEvent(MotionEvent e)
         {
-            return _detector.OnTouchEvent(e);
+            if (_detector.OnTouchEvent(e))
+            {
+                return true;
+            }
+
+            if (e.Action == MotionEventActions.Up)
+            {
+                return _listener.OnUp(e);
+            }
+
+            return false;
         }
 
         public override bool OnGenericMotionEvent(MotionEvent e)

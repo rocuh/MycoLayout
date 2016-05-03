@@ -43,12 +43,9 @@ namespace Myco
 
         #region Methods
 
-        protected override void Draw(SKCanvas canvas)
+        protected override void InternalDraw(SKCanvas canvas)
         {
-            base.Draw(canvas);
-
-            if (!IsVisible)
-                return;
+            base.InternalDraw(canvas);
 
             if (_bitmap != null)
             {
@@ -63,17 +60,18 @@ namespace Myco
 
                 float cx = (float)(renderBounds.X + (renderBounds.Width / 2.0) - (newWidth / 2.0));
                 float cy = (float)(renderBounds.Y + (renderBounds.Height / 2.0) - (newHeight / 2.0));
-
-                canvas.DrawBitmap(_bitmap, new SKRect(cx, cy, (float)(cx + newWidth), (float)(cy + newHeight)));
+                
+                using (var paint = new SKPaint())
+                {
+                    paint.XferMode = SKXferMode.SrcOver;
+                    canvas.DrawBitmap(_bitmap, new SKRect(cx, cy, (float)(cx + newWidth), (float)(cy + newHeight)), paint);
+                }
             }
         }
 
-        public override Size SizeRequest(double widthConstraint, double heightConstaint)
+        protected override Size InternalSizeRequest(double widthConstraint, double heightConstaint)
         {
-            if (!IsVisible)
-                return new Size(0, 0);
-
-            var size = base.SizeRequest(widthConstraint, heightConstaint);
+            var size = base.InternalSizeRequest(widthConstraint, heightConstaint);
 
             if (_bitmap != null)
             {

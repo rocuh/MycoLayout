@@ -10,6 +10,8 @@ namespace Myco
         #region Methods
 
         void GetGestureRecognizers(Point gestureStart, IList<Tuple<MycoView, MycoGestureRecognizer>> matches);
+        
+        void SendSurfaceSize(int width, int height);
 
         void SendDraw(SKCanvas canvas);
 
