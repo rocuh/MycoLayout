@@ -22,6 +22,7 @@ namespace Myco.iOS
 
         public NativeMycoContainer()
         {
+            BackgroundColor = UIColor.Clear;
             Opaque = false;
             UserInteractionEnabled = true;
         }
@@ -92,6 +93,8 @@ namespace Myco.iOS
             using (var surface = SKSurface.Create(width, height, SKColorType.N_32, SKAlphaType.Premul, _buff, width * 4))
             {
                 var skcanvas = surface.Canvas;
+
+                skcanvas.Clear();
                 skcanvas.Scale((float)screenScale, (float)screenScale);
                 using (new SKAutoCanvasRestore(skcanvas, true))
                 {
@@ -107,7 +110,6 @@ namespace Myco.iOS
                 // flip the image for CGContext.DrawImage
                 context.TranslateCTM(0, Frame.Height);
                 context.ScaleCTM(1, -1);
-                context.ClearRect(Bounds);
                 context.DrawImage(Bounds, image);
             }
         }

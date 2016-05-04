@@ -10,7 +10,7 @@ namespace Myco.Droid
     {
         #region Fields
 
-        private Bitmap _bitmap;
+        private Bitmap _bitmap = null;
         private GestureDetector _detector;
         private MycoGestureListener _listener;
         private MycoContainer _mycoContainer;
@@ -24,6 +24,11 @@ namespace Myco.Droid
         {
             _listener = new MycoGestureListener(context);
             _detector = new GestureDetector(_listener);
+        }
+
+        ~NativeMycoContainer()
+        {
+            Dispose(false);
         }
 
         #endregion Constructors
@@ -67,7 +72,8 @@ namespace Myco.Droid
 
                 _listener.Dispose();
                 _listener = null;
-                                
+
+                _bitmap.Recycle();
                 _bitmap.Dispose();
                 _bitmap = null;
 
@@ -84,7 +90,11 @@ namespace Myco.Droid
             if (_bitmap == null || _bitmap.Width != canvas.Width || _bitmap.Height != canvas.Height)
             {
                 if (_bitmap != null)
+                {
+                    _bitmap.Recycle();
                     _bitmap.Dispose();
+                    _bitmap = null;
+                }
 
                 _bitmap = Bitmap.CreateBitmap(canvas.Width, canvas.Height, Bitmap.Config.Argb8888);
 

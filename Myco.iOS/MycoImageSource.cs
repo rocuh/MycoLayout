@@ -3,6 +3,8 @@ using SkiaSharp;
 using System.Collections.Generic;
 using System.IO;
 using Xamarin.Forms;
+using System;
+using UIKit;
 
 [assembly: Xamarin.Forms.Dependency(typeof(Myco.iOS.MycoImageSource))]
 
@@ -29,20 +31,37 @@ namespace Myco.iOS
 
                 if (!_cache.TryGetValue(fullPath, out bitmap))
                 {
-                    if (File.Exists(fullPath))
-                    {
-                        bitmap = SKBitmap.Decode(fullPath);
-                    }
-                    else
-                    {
-                        string path = Path.GetDirectoryName(fullPath);
-                        string fileId = Path.GetFileNameWithoutExtension(fullPath).ToLower();
-                        string extension = Path.GetExtension(fullPath);
+                    string path = Path.GetDirectoryName(fullPath);
+                    string fileId = Path.GetFileNameWithoutExtension(fullPath).ToLower();
+                    string extension = Path.GetExtension(fullPath);
 
-                        var resourcePath = NSBundle.MainBundle.PathForResource(fileId, extension, path);
+                    int scaleInt = (int)Math.Round(UIScreen.MainScreen.Scale, MidpointRounding.AwayFromZero);
 
-                        bitmap = SKBitmap.Decode(resourcePath);
+                    string lastFoundResource = "";
+
+                    for (int i = 1; i <= scaleInt; i++)
+                    {
+                        if (File.Exists(Path.Combine(path, fileId + (i == 1 ? "" : $"@{i}x") + extension)))
+                        {
+                            lastFoundResource = Path.Combine(path, fileId + (i == 1 ? "" : $"@{i}x") + extension);
+                        }
+                        else
+                        {
+                            var resourcePath = NSBundle.MainBundle.PathForResource(fileId + (i == 1 ? "" : $"@{i}x"), extension, path);
+
+                            if (!File.Exists(resourcePath))
+                            {
+                                break;
+                            }
+
+                            lastFoundResource = resourcePath;
+                        }
                     }
+
+                    if (!String.IsNullOrEmpty(lastFoundResource))
+                    {
+                        bitmap = SKBitmap.Decode(lastFoundResource);
+                    }                   
 
                     if (bitmap != null)
                     {

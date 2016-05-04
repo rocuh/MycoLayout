@@ -64,6 +64,7 @@ namespace Myco
                 using (var paint = new SKPaint())
                 {
                     paint.XferMode = SKXferMode.SrcOver;
+                    paint.FilterQuality = SKFilterQuality.Low;
                     canvas.DrawBitmap(_bitmap, new SKRect(cx, cy, (float)(cx + newWidth), (float)(cy + newHeight)), paint);
                 }
             }

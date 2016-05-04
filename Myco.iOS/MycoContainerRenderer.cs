@@ -33,7 +33,7 @@ namespace Myco.iOS
 
         public static void Initialize()
         {
-            DateTime.Now.ToString();
+            DependencyService.Register<IMycoImageSource, MycoImageSource>();
         }
 
         protected override void OnElementChanged(ElementChangedEventArgs<MycoContainer> e)
@@ -155,7 +155,7 @@ namespace Myco.iOS
                             break;
                         case UIGestureRecognizerState.Changed:
                             var offset = pan.TranslationInView(Control);
-                            panGesture.SendPanUpdated(gestureRecognizer.Item1, offset.X, offset.Y);
+                            panGesture.SendPanUpdated(gestureRecognizer.Item1, -offset.X, -offset.Y);
                             break;
                         case UIGestureRecognizerState.Ended:
                             panGesture.SendPanCompleted(gestureRecognizer.Item1);

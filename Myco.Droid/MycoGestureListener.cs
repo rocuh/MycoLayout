@@ -10,6 +10,9 @@ namespace Myco.Droid
     {
         #region Fields
 
+        private static int ScrollThreshold = 20;
+
+
         private static int SwipeThreshold = 50;
         private static int SwipeVelocityThreshold = 50;
 
@@ -81,29 +84,34 @@ namespace Myco.Droid
 
         public override bool OnScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY)
         {
-            var gestureRecognizers = new List<Tuple<MycoView, MycoGestureRecognizer>>();
-
-            _container.GetGestureRecognizers(new Xamarin.Forms.Point(_context.FromPixels(e1.GetX()), _context.FromPixels(e1.GetY())), gestureRecognizers);
-
             bool gestureHandled = false;
 
-            foreach (var gestureRecognizer in gestureRecognizers)
-            {
-                var panGesture = gestureRecognizer.Item2 as MycoPanGestureRecognizer;
+            var point1 = new Xamarin.Forms.Point(e1.GetX(), e1.GetY());
+            var point2 = new Xamarin.Forms.Point(e2.GetX(), e2.GetY());
 
-                if (panGesture != null)
+            if (_activePanGesture == null && Math.Abs(point1.Distance(point2)) > ScrollThreshold)
+            {
+                var gestureRecognizers = new List<Tuple<MycoView, MycoGestureRecognizer>>();
+
+                _container.GetGestureRecognizers(new Xamarin.Forms.Point(_context.FromPixels(e1.GetX()), _context.FromPixels(e1.GetY())), gestureRecognizers);
+
+                foreach (var gestureRecognizer in gestureRecognizers)
                 {
-                    if (_activePanGesture == null)
+                    var panGesture = gestureRecognizer.Item2 as MycoPanGestureRecognizer;
+
+                    if (panGesture != null)
                     {
                         _activePanView = gestureRecognizer.Item1;
                         _activePanGesture = panGesture;
                         panGesture.SendPanStarted(gestureRecognizer.Item1);
-                    }
-                    else
-                    {
-                        panGesture.SendPanUpdated(gestureRecognizer.Item1, distanceY, distanceY);
+                        gestureHandled = true;
                     }
                 }
+            }
+            else if (_activePanGesture != null)
+            {
+                _activePanGesture.SendPanUpdated(_activePanView, _context.FromPixels(distanceX), _context.FromPixels(distanceY));
+                gestureHandled = true;
             }
 
             return gestureHandled;
@@ -133,6 +141,7 @@ namespace Myco.Droid
                             if (swipeGesture != null)
                             {
                                 swipeGesture.SendSwipeLeft(gestureRecognizer.Item1);
+                                gestureHandled = true;
                             }
                         }
                     }
@@ -145,6 +154,7 @@ namespace Myco.Droid
                             if (swipeGesture != null)
                             {
                                 swipeGesture.SendSwipeRight(gestureRecognizer.Item1);
+                                gestureHandled = true;
                             }
                         }
                     }
@@ -168,7 +178,7 @@ namespace Myco.Droid
 
                 if (tapGesture != null && tapGesture.NumberOfTapsRequired == 1)
                 {
-                    tapGesture.SendTapped(gestureRecognizer.Item1, e.GetX() - gestureRecognizer.Item1.RenderBounds.X, e.GetY() -gestureRecognizer.Item1.RenderBounds.Y);
+                    tapGesture.SendTapped(gestureRecognizer.Item1, _context.FromPixels(e.GetX()) - gestureRecognizer.Item1.RenderBounds.X, _context.FromPixels(e.GetY()) -gestureRecognizer.Item1.RenderBounds.Y);
                     gestureHandled = true;
                 }
             }

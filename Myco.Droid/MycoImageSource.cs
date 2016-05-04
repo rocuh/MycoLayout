@@ -4,12 +4,13 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Xamarin.Forms;
+using Android.Runtime;
 
 [assembly: Xamarin.Forms.Dependency(typeof(Myco.Droid.MycoImageSource))]
 
 namespace Myco.Droid
 {
-    public class MycoImageSource : IMycoImageSource
+	public class MycoImageSource : IMycoImageSource
     {
         #region Fields
 
@@ -36,9 +37,7 @@ namespace Myco.Droid
                     }
                     else
                     {
-                        string path = System.IO.Path.GetDirectoryName(fullPath);
                         string fileId = System.IO.Path.GetFileNameWithoutExtension(fullPath).ToLower();
-                        string extension = System.IO.Path.GetExtension(fullPath);
 
                         var id = Android.App.Application.Context.Resources.GetIdentifier(fileId, "drawable", Android.App.Application.Context.PackageName);
 

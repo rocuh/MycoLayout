@@ -22,6 +22,11 @@ namespace Myco.Droid
 
         #region Methods
 
+        public static void Initialize()
+        {
+            DependencyService.Register<IMycoImageSource, MycoImageSource>();
+        }
+
         protected override void OnElementChanged(ElementChangedEventArgs<MycoContainer> e)
         {
             base.OnElementChanged(e);
@@ -59,7 +64,7 @@ namespace Myco.Droid
         {
             base.OnElementPropertyChanged(sender, e);
 
-            if (e.PropertyName == MycoContainer.ContentProperty.PropertyName)
+            if (e.PropertyName == MycoContainer.ContentProperty.PropertyName && Control != null)
             {
                 Control.Invalidate();
             }
