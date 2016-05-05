@@ -1,10 +1,10 @@
 using Foundation;
 using SkiaSharp;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using Xamarin.Forms;
-using System;
 using UIKit;
+using Xamarin.Forms;
 
 [assembly: Xamarin.Forms.Dependency(typeof(Myco.iOS.MycoImageSource))]
 
@@ -32,7 +32,7 @@ namespace Myco.iOS
                 if (!_cache.TryGetValue(fullPath, out bitmap))
                 {
                     string path = Path.GetDirectoryName(fullPath);
-                    string fileId = Path.GetFileNameWithoutExtension(fullPath).ToLower();
+                    string fileId = Path.GetFileNameWithoutExtension(fullPath);
                     string extension = Path.GetExtension(fullPath);
 
                     int scaleInt = (int)Math.Round(UIScreen.MainScreen.Scale, MidpointRounding.AwayFromZero);
@@ -61,7 +61,7 @@ namespace Myco.iOS
                     if (!String.IsNullOrEmpty(lastFoundResource))
                     {
                         bitmap = SKBitmap.Decode(lastFoundResource);
-                    }                   
+                    }
 
                     if (bitmap != null)
                     {

@@ -10,7 +10,7 @@ namespace Myco.Droid
     {
         #region Fields
 
-        private static int ScrollThreshold = 20;
+        private static int ScrollThreshold = 30;
 
 
         private static int SwipeThreshold = 50;
@@ -110,7 +110,7 @@ namespace Myco.Droid
             }
             else if (_activePanGesture != null)
             {
-                _activePanGesture.SendPanUpdated(_activePanView, _context.FromPixels(distanceX), _context.FromPixels(distanceY));
+                _activePanGesture.SendPanUpdatedWithUpdate(_activePanView, _context.FromPixels(distanceX), _context.FromPixels(distanceY));
                 gestureHandled = true;
             }
 

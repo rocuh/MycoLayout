@@ -101,6 +101,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ListViewCleanupRenderer.cs" />
     <Compile Include="MycoGestureListener.cs" />
     <Compile Include="NativeMycoContainer.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />

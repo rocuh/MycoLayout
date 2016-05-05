@@ -4,11 +4,21 @@ namespace Myco
 {
     public class MycoPanGestureRecognizer : MycoGestureRecognizer
     {
+        #region Fields
+
+        private double _lastOffsetX;
+        private double _lastOffsetY;
+
+        #endregion Fields
+
         #region Events
 
         public event EventHandler PanCancelled;
+
         public event EventHandler PanCompleted;
+
         public event EventHandler PanStarted;
+
         public event EventHandler<PanEventArgs> PanUpdated;
 
         #endregion Events
@@ -33,17 +43,31 @@ namespace Myco
 
         public void SendPanStarted(MycoView view)
         {
+            _lastOffsetX = 0;
+            _lastOffsetY = 0;
+
             if (PanStarted != null)
             {
                 PanStarted(this, new EventArgs());
             }
         }
 
-        public void SendPanUpdated(MycoView view, double totalX, double totalY)
+        public void SendPanUpdatedWithOffset(MycoView view, double offsetX, double offsetY)
         {
             if (PanUpdated != null)
             {
-                PanUpdated(this, new PanEventArgs(totalX, totalY));
+                PanUpdated(this, new PanEventArgs(offsetX - _lastOffsetX, offsetY - _lastOffsetY));
+            }
+
+            _lastOffsetX = offsetX;
+            _lastOffsetY = offsetY;
+        }
+
+        public void SendPanUpdatedWithUpdate(MycoView view, double updateX, double updateY)
+        {
+            if (PanUpdated != null)
+            {
+                PanUpdated(this, new PanEventArgs(updateX, updateY));
             }
         }
 

@@ -152,16 +152,6 @@ namespace Myco
             }
         }
 
-        protected override void InternalLayout(Rectangle rectangle)
-        {
-            base.InternalLayout(rectangle);
-
-            foreach (MycoView child in Children)
-            {
-                child.Layout(new Rectangle(0, 0, Bounds.Width, Bounds.Height));
-            }
-        }
-
         protected override void InternalDraw(SKCanvas canvas)
         {
             base.InternalDraw(canvas);
@@ -169,6 +159,16 @@ namespace Myco
             foreach (MycoView child in Children)
             {
                 child.Draw(canvas);
+            }
+        }
+
+        protected override void InternalLayout(Rectangle rectangle)
+        {
+            base.InternalLayout(rectangle);
+
+            foreach (MycoView child in Children)
+            {
+                child.Layout(new Rectangle(0, 0, Bounds.Width, Bounds.Height));
             }
         }
 

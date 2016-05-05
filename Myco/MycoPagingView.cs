@@ -20,9 +20,9 @@ namespace Myco
 
         public static readonly BindableProperty SelectedIndexProperty = BindableProperty.Create(nameof(SelectedIndex), typeof(int), typeof(MycoPagingView), 0,
                 defaultBindingMode: BindingMode.TwoWay,
-                propertyChanged: (bindable, oldValue, newValue) =>
+                propertyChanged: async (bindable, oldValue, newValue) =>
                 {
-                    ((MycoPagingView)bindable).SetupPage();
+                    await ((MycoPagingView)bindable).AnimateToPage((int)newValue);
                 });
 
         private MycoView _currentView;
@@ -106,19 +106,22 @@ namespace Myco
         public async Task AnimateToPage(int index)
         {
             // really animate to new page ?
-            if (SelectedIndex != index && _visiblePageIndex != index)
+            if (_visiblePageIndex != index && _nextView == null)
             {
+                // get animation direction
+                var translation = _visiblePageIndex < index ? Width : -Width;
+
                 // indicate this is the one that is visible
                 _visiblePageIndex = index;
+
+                // save selected
+                SelectedIndex = index;
 
                 // get view to move to
                 _nextView = (MycoView)ItemTemplate.CreateContent();
                 _nextView.BindingContext = ItemsSource[index];
                 _nextView.Parent = this;
                 _nextView.Layout(new Rectangle(0, 0, Bounds.Width, Bounds.Height));
-
-                // get animation direction
-                var translation = SelectedIndex < index ? Width : -Width;
 
                 // setup the next view offscreen
                 _nextView.TranslationX = translation;
@@ -137,23 +140,8 @@ namespace Myco
                 oldView.Parent = null;
                 oldView = null;
 
-                // save selected
-                SelectedIndex = index;
-            }
-        }
-
-        protected override void InternalLayout(Rectangle rectangle)
-        {
-            base.InternalLayout(rectangle);
-
-            if (_currentView != null)
-            {
-                _currentView.Layout(new Rectangle(0, 0, rectangle.Width, rectangle.Height));
-            }
-
-            if (_nextView != null)
-            {
-                _nextView.Layout(new Rectangle(0, 0, rectangle.Width, rectangle.Height));
+                // allow next animation
+                _nextView = null;
             }
         }
 
@@ -172,9 +160,24 @@ namespace Myco
             }
         }
 
+        protected override void InternalLayout(Rectangle rectangle)
+        {
+            base.InternalLayout(rectangle);
+
+            if (_currentView != null)
+            {
+                _currentView.Layout(new Rectangle(0, 0, rectangle.Width, rectangle.Height));
+            }
+
+            if (_nextView != null)
+            {
+                _nextView.Layout(new Rectangle(0, 0, rectangle.Width, rectangle.Height));
+            }
+        }
+
         private void SetupPage()
         {
-            if (_visiblePageIndex != SelectedIndex)
+            if (_visiblePageIndex != SelectedIndex && ItemsSource != null)
             {
                 _currentView = (MycoView)ItemTemplate.CreateContent();
                 _currentView.BindingContext = ItemsSource[SelectedIndex];

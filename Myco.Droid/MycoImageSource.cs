@@ -4,13 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Xamarin.Forms;
-using Android.Runtime;
 
 [assembly: Xamarin.Forms.Dependency(typeof(Myco.Droid.MycoImageSource))]
 
 namespace Myco.Droid
 {
-	public class MycoImageSource : IMycoImageSource
+    public class MycoImageSource : IMycoImageSource
     {
         #region Fields
 
@@ -26,7 +25,7 @@ namespace Myco.Droid
             if (source is FileImageSource)
             {
                 string fullPath = ((FileImageSource)source).File;
-                
+
                 SKBitmap bitmap;
 
                 if (!_cache.TryGetValue(fullPath, out bitmap))
@@ -47,7 +46,7 @@ namespace Myco.Droid
 
                         using (var nativeBitmap = BitmapFactory.DecodeResource(Android.App.Application.Context.Resources, id, opts))
                         {
-                            int size = nativeBitmap.Width * nativeBitmap .Height * bytesPerPixel;
+                            int size = nativeBitmap.Width * nativeBitmap.Height * bytesPerPixel;
                             var pixelData = new byte[size];
                             using (var byteBuffer = Java.Nio.ByteBuffer.AllocateDirect(size))
                             {
@@ -71,7 +70,6 @@ namespace Myco.Droid
                                 bitmap.UnlockPixels();
                             }
                         }
-                        
 
                         if (bitmap != null)
                         {

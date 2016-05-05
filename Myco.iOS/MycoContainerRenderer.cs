@@ -60,6 +60,7 @@ namespace Myco.iOS
                 AddGestureRecognizer(_swipeGestureRight);
 
                 _panGesture = new UIPanGestureRecognizer(HandlePan);
+                _panGesture.ShouldReceiveTouch += ValidateTouch;
                 AddGestureRecognizer(_panGesture);
             }
 
@@ -155,7 +156,7 @@ namespace Myco.iOS
                             break;
                         case UIGestureRecognizerState.Changed:
                             var offset = pan.TranslationInView(Control);
-                            panGesture.SendPanUpdated(gestureRecognizer.Item1, -offset.X, -offset.Y);
+                            panGesture.SendPanUpdatedWithOffset(gestureRecognizer.Item1, -offset.X, -offset.Y);
                             break;
                         case UIGestureRecognizerState.Ended:
                             panGesture.SendPanCompleted(gestureRecognizer.Item1);
@@ -187,7 +188,7 @@ namespace Myco.iOS
             }
         }
 
-        private bool ValidateTouch(UIGestureRecognizer tap, UITouch touch)
+        private bool ValidateTouch(UIGestureRecognizer gesture, UITouch touch)
         {
             var gestureRecognizers = new List<Tuple<MycoView, MycoGestureRecognizer>>();
 
@@ -199,20 +200,26 @@ namespace Myco.iOS
 
             foreach (var gestureRecognizer in gestureRecognizers)
             {
-                var tapGesture = gestureRecognizer.Item2 as MycoTapGestureRecognizer;
-
-                if (tapGesture != null)
+                if (gesture is UITapGestureRecognizer)
                 {
-                    if (tapGesture.NumberOfTapsRequired == 1)
+                    var tapGesture = gestureRecognizer.Item2 as MycoTapGestureRecognizer;
+
+                    if (tapGesture != null)
                     {
-                        gestureHandled = true;
+                        if (tapGesture.NumberOfTapsRequired == 1)
+                        {
+                            gestureHandled = true;
+                        }
                     }
                 }
-                else
+                else if (gesture is UISwipeGestureRecognizer)
                 {
-                    gestureHandled = true;
+                   gestureHandled |= gestureRecognizer.Item2 is MycoSwipeGestureRecognizer;
                 }
-                
+                else if (gesture is UIPanGestureRecognizer)
+                {
+                   gestureHandled |= gestureRecognizer.Item2 is MycoPanGestureRecognizer;
+                }
             }
 
             return gestureHandled;
