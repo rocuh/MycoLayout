@@ -73,9 +73,12 @@ namespace Myco.Droid
                 _listener.Dispose();
                 _listener = null;
 
-                _bitmap.Recycle();
-                _bitmap.Dispose();
-                _bitmap = null;
+                if (_bitmap != null)
+                {
+                    _bitmap.Recycle();
+                    _bitmap.Dispose();
+                    _bitmap = null;
+                }
 
                 disposed = true;
             }
