@@ -15,13 +15,13 @@ namespace Myco
 
                 if (newValue != null)
                 {
-                    ctrl._bitmap = DependencyService.Get<IMycoImageSource>().SKBitmapFromImageSource((ImageSource)newValue);
+                    ctrl.Drawable = DependencyService.Get<IMycoImageSource>().SKBitmapFromImageSource((ImageSource)newValue);
                 }
 
                 ctrl.Invalidate();
             });
 
-        private SKBitmap _bitmap;
+        protected IMycoDrawable Drawable;
 
         #endregion Fields
 
@@ -47,16 +47,17 @@ namespace Myco
         {
             base.InternalDraw(canvas);
 
-            if (_bitmap != null)
+            if (Drawable != null)
             {
                 var renderBounds = RenderBounds;
+                var drawableSize = Drawable.GetSize(renderBounds.Width, renderBounds.Height);
 
-                double ratioX = (double)renderBounds.Width / (double)_bitmap.Width;
-                double ratioY = (double)renderBounds.Height / (double)_bitmap.Height;
+                double ratioX = (double)renderBounds.Width / (double)drawableSize.Width;
+                double ratioY = (double)renderBounds.Height / (double)drawableSize.Height;
                 double ratio = ratioX < ratioY ? ratioX : ratioY;
 
-                double newWidth = _bitmap.Width * ratio;
-                double newHeight = _bitmap.Height * ratio;
+                double newWidth = drawableSize.Width * ratio;
+                double newHeight = drawableSize.Height * ratio;
 
                 float cx = (float)(renderBounds.X + (renderBounds.Width / 2.0) - (newWidth / 2.0));
                 float cy = (float)(renderBounds.Y + (renderBounds.Height / 2.0) - (newHeight / 2.0));
@@ -65,7 +66,7 @@ namespace Myco
                 {
                     paint.XferMode = SKXferMode.SrcOver;
                     paint.FilterQuality = SKFilterQuality.Low;
-                    canvas.DrawBitmap(_bitmap, new SKRect(cx, cy, (float)(cx + newWidth), (float)(cy + newHeight)), paint);
+                    Drawable.Draw(canvas, new Rectangle(cx, cy, newWidth, newHeight), paint);
                 }
             }
         }
@@ -74,9 +75,10 @@ namespace Myco
         {
             var size = base.InternalSizeRequest(widthConstraint, heightConstaint);
 
-            if (_bitmap != null)
+            if (Drawable != null)
             {
-                return new Size(Double.IsPositiveInfinity(size.Width) ? _bitmap.Width : Math.Min(_bitmap.Width, size.Width), Double.IsPositiveInfinity(size.Height) ? _bitmap.Height : Math.Min(_bitmap.Height, size.Height));
+                var drawableSize = Drawable.GetSize(widthConstraint, heightConstaint);
+                return new Size(Double.IsPositiveInfinity(size.Width) ? drawableSize.Width : Math.Min(drawableSize.Width, size.Width), Double.IsPositiveInfinity(size.Height) ? drawableSize.Height : Math.Min(drawableSize.Height, size.Height));
             }
 
             return size;

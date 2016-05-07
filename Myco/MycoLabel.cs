@@ -9,10 +9,10 @@ namespace Myco
         #region Fields
 
         public static readonly BindableProperty FontAttributesProperty = BindableProperty.Create(nameof(FontAttributes), typeof(FontAttributes), typeof(MycoLabel), FontAttributes.None,
-           propertyChanged: (bindableObject, oldValue, newValue) =>
-           {
+            propertyChanged: (bindableObject, oldValue, newValue) =>
+            {
                ((MycoLabel)bindableObject).Invalidate();
-           });
+            });
 
         public static readonly BindableProperty FontFamilyProperty = BindableProperty.Create(nameof(FontFamily), typeof(string), typeof(MycoLabel), null,
             propertyChanged: (bindableObject, oldValue, newValue) =>
@@ -21,34 +21,34 @@ namespace Myco
             });
 
         public static readonly BindableProperty FontSizeProperty = BindableProperty.Create(nameof(FontSize), typeof(int), typeof(MycoLabel), 10,
-           propertyChanged: (bindableObject, oldValue, newValue) =>
-           {
-               ((MycoLabel)bindableObject).Invalidate();
-           });
+            propertyChanged: (bindableObject, oldValue, newValue) =>
+            {
+                ((MycoLabel)bindableObject).Invalidate();
+            });
 
         public static readonly BindableProperty HorizontalTextAlignmentProperty = BindableProperty.Create(nameof(HorizontalTextAlignment), typeof(TextAlignment), typeof(MycoLabel), TextAlignment.Start,
-             propertyChanged: (bindableObject, oldValue, newValue) =>
-             {
-                 ((MycoLabel)bindableObject).Invalidate();
-             });
+            propertyChanged: (bindableObject, oldValue, newValue) =>
+            {
+                ((MycoLabel)bindableObject).Invalidate();
+            });
 
         public static readonly BindableProperty TextColorProperty = BindableProperty.Create(nameof(TextColor), typeof(Color), typeof(MycoLabel), Color.Black,
-                                     propertyChanged: (bindableObject, oldValue, newValue) =>
-                                     {
-                                         ((MycoLabel)bindableObject).Invalidate();
-                                     });
+            propertyChanged: (bindableObject, oldValue, newValue) =>
+            {
+                ((MycoLabel)bindableObject).Invalidate();
+            });
 
         public static readonly BindableProperty TextProperty = BindableProperty.Create(nameof(Text), typeof(string), typeof(MycoLabel), String.Empty,
-                                             propertyChanged: (bindableObject, oldValue, newValue) =>
-             {
-                 ((MycoLabel)bindableObject).Invalidate();
-             });
+            propertyChanged: (bindableObject, oldValue, newValue) =>
+            {
+                ((MycoLabel)bindableObject).Invalidate();
+            });
 
         public static readonly BindableProperty VerticalTextAlignmentProperty = BindableProperty.Create(nameof(VerticalTextAlignment), typeof(TextAlignment), typeof(MycoLabel), TextAlignment.Start,
-                             propertyChanged: (bindableObject, oldValue, newValue) =>
-             {
-                 ((MycoLabel)bindableObject).Invalidate();
-             });
+            propertyChanged: (bindableObject, oldValue, newValue) =>
+            {
+                ((MycoLabel)bindableObject).Invalidate();
+            });
 
         private SKTypeface _typeFace;
         private FontAttributes _typeFaceFontAttributes;

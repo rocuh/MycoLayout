@@ -37,7 +37,11 @@
   <ItemGroup>
     <Compile Include="BindableObjectExtensions.cs" />
     <Compile Include="IMycoController.cs" />
+    <Compile Include="IMycoDrawable.cs" />
     <Compile Include="IMycoImageSource.cs" />
+    <Compile Include="MycoCheckImage.cs" />
+    <Compile Include="MycoDrawableBitmap.cs" />
+    <Compile Include="MycoDrawableNinePatch.cs" />
     <Compile Include="MycoPagingLayout.cs" />
     <Compile Include="MycoPagingView.cs" />
     <Compile Include="MycoContentView.cs" />

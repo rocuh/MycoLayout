@@ -254,24 +254,28 @@ namespace Myco
             }
         }
 
+        public bool IsScaled
+        {
+            get
+            {
+                return Math.Abs(Scale - 1.0) > 0.0001;
+            }
+        }
+
         public Rectangle RenderBounds
         {
             get
             {
-                var totalScale = InheritiedScale;
                 var totalTranslationX = InheritiedTranslationX;
                 var totalTranslationY = InheritiedTranslationY;
                 var totalX = InheritedX;
                 var totalY = InheritedY;
-
-                var scaleW = Width * totalScale;
-                var scaleH = Height * totalScale;
-
+                
                 return new Rectangle(
-                    totalX + totalTranslationX - ((scaleW - Width) / 2.0),
-                    totalY + totalTranslationY - ((scaleH - Height) / 2.0),
-                    scaleW,
-                    scaleH);
+                    totalX + totalTranslationX,
+                    totalY + totalTranslationY,
+                    Width,
+                    Height);
             }
         }
 
@@ -389,21 +393,30 @@ namespace Myco
             if (!IsVisible)
                 return;
 
-            int canvasState = -1;
+            int canvasState = int.MaxValue;
+
+            var renderBounds = RenderBounds;
+
+            if (IsScaled || IsClippedToBounds)
+            {
+                canvasState = canvas.Save();
+            }
+
+            if (IsScaled)
+            {
+                canvas.Translate((float)renderBounds.Center.X, (float)renderBounds.Center.Y);
+                canvas.Scale((float)Scale, (float)Scale);
+                canvas.Translate((float)-renderBounds.Center.X, (float)-renderBounds.Center.Y);
+            }
+
+            if (IsClippedToBounds)
+            {
+                canvas.ClipRect(renderBounds.ToSKRect());
+            }
 
             if (IsOpaque)
             {
-
-                if (IsClippedToBounds)
-                {
-                    canvasState = canvas.Save();
-                    canvas.ClipRect(RenderBounds.ToSKRect());
-                }
-
                 InternalDraw(canvas);
-
-                if (IsClippedToBounds)
-                    canvas.RestoreToCount(canvasState);
             }
             else
             {
@@ -411,7 +424,7 @@ namespace Myco
                 {
                     if (IsClippedToBounds)
                     {
-                        surface.Canvas.ClipRect(RenderBounds.ToSKRect());
+                        surface.Canvas.ClipRect(renderBounds.ToSKRect());
                     }
 
                     InternalDraw(surface.Canvas);
@@ -422,6 +435,11 @@ namespace Myco
                         canvas.DrawImage(surface.Snapshot(), 0, 0, paint);
                     }
                 }
+            }
+
+            if (canvasState != int.MaxValue)                
+            {
+                canvas.RestoreToCount(canvasState);
             }
         }
 

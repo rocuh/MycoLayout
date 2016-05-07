@@ -1,6 +1,7 @@
 ﻿using SkiaSharp;
 using System;
 using System.Collections;
+using System.Collections.Specialized;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
@@ -13,7 +14,7 @@ namespace Myco
         public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(nameof(ItemsSource), typeof(object), typeof(MycoPagingView), null,
             propertyChanged: (bindable, oldValue, newValue) =>
             {
-                ((MycoPagingView)bindable).SetupPage();
+                ((MycoPagingView)bindable).ItemsSourceChanged(oldValue, newValue);
             });
 
         public static readonly BindableProperty ItemTemplateProperty = BindableProperty.Create(nameof(ItemTemplate), typeof(DataTemplate), typeof(MycoPagingView), null);
@@ -106,7 +107,7 @@ namespace Myco
         public async Task AnimateToPage(int index)
         {
             // really animate to new page ?
-            if (_visiblePageIndex != index && _nextView == null)
+            if (_visiblePageIndex != index && _nextView == null && ItemsSource != null)
             {
                 // get animation direction
                 var translation = _visiblePageIndex < index ? Width : -Width;
@@ -175,6 +176,45 @@ namespace Myco
             }
         }
 
+        private void ItemsSourceChanged(object oldValue, object newValue)
+        {
+            var oldValueNotifyChanged = oldValue as INotifyCollectionChanged;
+
+            if (oldValueNotifyChanged != null)
+            {
+                oldValueNotifyChanged.CollectionChanged -= ItemsSource_OnItemChanged;
+            }
+
+            var newValueNotifyChanged = newValue as INotifyCollectionChanged;
+
+            if (newValueNotifyChanged != null)
+            {
+                newValueNotifyChanged.CollectionChanged += ItemsSource_OnItemChanged;
+            }
+
+            SetupPage();
+        }
+
+        private void ItemsSource_OnItemChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (ItemsSource != null && SelectedIndex > ItemsSource.Count)
+            {
+                // currently indexing beyond the page list
+                SelectedIndex = ItemsSource.Count - 1;
+            }
+            else if (ItemsSource != null && SelectedIndex < ItemsSource.Count && _currentView != ItemsSource[SelectedIndex])
+            {
+                // selected page is no longer what we originally had - select the page at the index we are at
+                _visiblePageIndex = -1;
+                SetupPage();
+            }
+            else if (ItemsSource == null)
+            {
+                // page source is all gone
+                SetupPage();
+            }
+        }
+
         private void SetupPage()
         {
             if (_visiblePageIndex != SelectedIndex && ItemsSource != null)
@@ -192,6 +232,13 @@ namespace Myco
                 }
 
                 _visiblePageIndex = SelectedIndex;
+
+                Invalidate();
+            }
+            else if (ItemsSource == null)
+            {
+                _currentView = null;
+                _nextView = null;
 
                 Invalidate();
             }

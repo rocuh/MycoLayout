@@ -7,7 +7,7 @@ namespace Myco
     {
         #region Methods
 
-        SKBitmap SKBitmapFromImageSource(ImageSource source);
+        IMycoDrawable SKBitmapFromImageSource(ImageSource source);
 
         #endregion Methods
     }

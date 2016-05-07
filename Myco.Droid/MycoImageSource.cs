@@ -14,22 +14,24 @@ namespace Myco.Droid
         #region Fields
 
         /// FIXME: this needs to have some sort of cleanup!
-        private Dictionary<string, SKBitmap> _cache = new Dictionary<string, SKBitmap>();
+        private Dictionary<string, IMycoDrawable> _cache = new Dictionary<string, IMycoDrawable>();
 
         #endregion Fields
 
         #region Methods
 
-        public SKBitmap SKBitmapFromImageSource(ImageSource source)
+        public IMycoDrawable SKBitmapFromImageSource(ImageSource source)
         {
             if (source is FileImageSource)
             {
                 string fullPath = ((FileImageSource)source).File;
 
-                SKBitmap bitmap;
+                IMycoDrawable drawable = null;
 
-                if (!_cache.TryGetValue(fullPath, out bitmap))
+                if (!_cache.TryGetValue(fullPath, out drawable))
                 {
+                    SKBitmap bitmap;
+
                     if (System.IO.File.Exists(fullPath))
                     {
                         bitmap = SKBitmap.Decode(fullPath);
@@ -38,11 +40,19 @@ namespace Myco.Droid
                     {
                         string fileId = System.IO.Path.GetFileNameWithoutExtension(fullPath).ToLower();
 
+                        bool isNinePatch = false;
+
+                        if (System.IO.Path.GetExtension(fileId) == ".9p")
+                        {
+                            fileId = System.IO.Path.GetFileNameWithoutExtension(fileId).ToLower();
+                            isNinePatch = true;
+                        }
+
                         var id = Android.App.Application.Context.Resources.GetIdentifier(fileId, "drawable", Android.App.Application.Context.PackageName);
 
                         const int bytesPerPixel = 4;
 
-                        BitmapFactory.Options opts = new BitmapFactory.Options { InPreferredConfig = Bitmap.Config.Argb8888 };
+                        BitmapFactory.Options opts = new BitmapFactory.Options { InPreferredConfig = Bitmap.Config.Argb8888, InScaled = !isNinePatch };
 
                         using (var nativeBitmap = BitmapFactory.DecodeResource(Android.App.Application.Context.Resources, id, opts))
                         {
@@ -73,12 +83,13 @@ namespace Myco.Droid
 
                         if (bitmap != null)
                         {
-                            _cache.Add(fullPath, bitmap);
+                            drawable = isNinePatch ? new MycoDrawableNinePatch(bitmap) as IMycoDrawable : new MycoDrawableBitmap(bitmap) as IMycoDrawable;
+                            _cache.Add(fullPath, drawable);
                         }
                     }
                 }
 
-                return bitmap;
+                return drawable;
             }
 
             return null;

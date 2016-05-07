@@ -15,7 +15,17 @@
 
     <ml:MycoContainer Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
       <ml:MycoPagingLayout x:Name="Carousel">
-        <ml:MycoLabel Text="Page 1" FontSize="30" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"/>
+        
+        <ml:MycoGrid>
+          <ml:MycoGrid.RowDefinitions>
+            <RowDefinition Height="*"/>
+          </ml:MycoGrid.RowDefinitions>
+          <ml:MycoGrid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+          </ml:MycoGrid.ColumnDefinitions>
+          <ml:MycoImageButton ml:MycoGrid.Row="0" ml:MycoGrid.Column="0" Source="button.9p.png" Text="9PATCH BUTTON" FontSize="18" FontAttributes="Bold" TextColor="White" WidthRequest="200" HeightRequest="50" HorizontalOptions="Center" VerticalOptions="Center"/>
+        </ml:MycoGrid>
+        
         <ml:MycoGrid Padding="5,5,5,5">
           <ml:MycoGrid.RowDefinitions>
             <RowDefinition Height="Auto"/>

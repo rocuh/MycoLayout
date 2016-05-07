@@ -15,26 +15,30 @@ namespace Myco.iOS
         #region Fields
 
         // FIXME: this needs to have some sort of cleanup!
-        private Dictionary<string, SKBitmap> _cache = new Dictionary<string, SKBitmap>();
+        private Dictionary<string, IMycoDrawable> _cache = new Dictionary<string, IMycoDrawable>();
 
         #endregion Fields
 
         #region Methods
 
-        public SKBitmap SKBitmapFromImageSource(ImageSource source)
+        public IMycoDrawable SKBitmapFromImageSource(ImageSource source)
         {
             if (source is FileImageSource)
             {
                 string fullPath = ((FileImageSource)source).File;
 
-                SKBitmap bitmap;
+                IMycoDrawable drawable = null;
 
-                if (!_cache.TryGetValue(fullPath, out bitmap))
+                if (!_cache.TryGetValue(fullPath, out drawable))
                 {
+                    SKBitmap bitmap = null;
+
                     string path = Path.GetDirectoryName(fullPath);
                     string fileId = Path.GetFileNameWithoutExtension(fullPath);
                     string extension = Path.GetExtension(fullPath);
 
+                    bool isNinePatch = Path.GetExtension(fileId) == ".9p";
+                    
                     int scaleInt = (int)Math.Round(UIScreen.MainScreen.Scale, MidpointRounding.AwayFromZero);
 
                     string lastFoundResource = "";
@@ -65,11 +69,12 @@ namespace Myco.iOS
 
                     if (bitmap != null)
                     {
-                        _cache.Add(fullPath, bitmap);
+                        drawable = isNinePatch ? new MycoDrawableNinePatch(bitmap) as IMycoDrawable : new MycoDrawableBitmap(bitmap) as IMycoDrawable;
+                        _cache.Add(fullPath, drawable);
                     }
                 }
 
-                return bitmap;
+                return drawable;
             }
 
             return null;

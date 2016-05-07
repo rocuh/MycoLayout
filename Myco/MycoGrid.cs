@@ -100,8 +100,12 @@ namespace Myco
 
         #endregion Properties
 
+        #region Classes
+
         public class GridElementCollection : ObservableCollection<MycoView>
         {
+            #region Methods
+
             public void Add(MycoView view, int column, int row, int columnSpan = 1, int rowSpan = 1)
             {
                 SetColumn(view, column);
@@ -110,29 +114,13 @@ namespace Myco
                 SetRowSpan(view, rowSpan);
                 base.Add(view);
             }
+
+            #endregion Methods
         }
+
+        #endregion Classes
 
         #region Methods
-
-        public static void SetColumn(BindableObject bindable, int value)
-        {
-            bindable.SetValue(ColumnProperty, value);
-        }
-
-        public static void SetColumnSpan(BindableObject bindable, int value)
-        {
-            bindable.SetValue(ColumnSpanProperty, value);
-        }
-
-        public static void SetRow(BindableObject bindable, int value)
-        {
-            bindable.SetValue(RowProperty, value);
-        }
-
-        public static void SetRowSpan(BindableObject bindable, int value)
-        {
-            bindable.SetValue(RowSpanProperty, value);
-        }
 
         public static int GetColumn(BindableObject bindable)
         {
@@ -154,14 +142,24 @@ namespace Myco
             return (int)bindable.GetValue(MycoGrid.RowSpanProperty);
         }
 
-        protected override void InternalDraw(SKCanvas canvas)
+        public static void SetColumn(BindableObject bindable, int value)
         {
-            base.InternalDraw(canvas);
+            bindable.SetValue(ColumnProperty, value);
+        }
 
-            foreach (var child in Children)
-            {
-                child.Draw(canvas);
-            }
+        public static void SetColumnSpan(BindableObject bindable, int value)
+        {
+            bindable.SetValue(ColumnSpanProperty, value);
+        }
+
+        public static void SetRow(BindableObject bindable, int value)
+        {
+            bindable.SetValue(RowProperty, value);
+        }
+
+        public static void SetRowSpan(BindableObject bindable, int value)
+        {
+            bindable.SetValue(RowSpanProperty, value);
         }
 
         public override void GetGestureRecognizers(Point gestureStart, IList<Tuple<MycoView, MycoGestureRecognizer>> matches)
@@ -174,6 +172,16 @@ namespace Myco
                 {
                     child.GetGestureRecognizers(gestureStart, matches);
                 }
+            }
+        }
+
+        protected override void InternalDraw(SKCanvas canvas)
+        {
+            base.InternalDraw(canvas);
+
+            foreach (var child in Children)
+            {
+                child.Draw(canvas);
             }
         }
 
