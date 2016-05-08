@@ -55,9 +55,11 @@ namespace Myco
                 ((MycoImageButton)bindableObject).Invalidate();
             });
 
+        private const int MinimumDownTime = 250;
         private SKTypeface _typeFace;
         private FontAttributes _typeFaceFontAttributes;
         private string _typeFaceFontFamily;
+        private DateTime _downTime;
 
         #endregion Fields
 
@@ -65,12 +67,37 @@ namespace Myco
 
         public MycoImageButton()
         {
-            var tapGestureRecoginizer = new MycoTapGestureRecognizer()
-            {
-                Command = TransitionCommand
-            };
-
+            var tapGestureRecoginizer = new MycoTapGestureRecognizer();
+            tapGestureRecoginizer.TouchDown += TapGestureRecoginizer_TouchDown;
+            tapGestureRecoginizer.TouchUp += TapGestureRecoginizer_TouchUp;
             GestureRecognizers.Add(tapGestureRecoginizer);
+        }
+
+        private async void TapGestureRecoginizer_TouchUp(object sender, TouchUpEventArgs e)
+        {
+            int waitTime = MinimumDownTime - (int) (DateTime.Now - _downTime).TotalMilliseconds;
+
+            if (waitTime > 0 && waitTime <= MinimumDownTime)
+            {
+                await Task.Delay(waitTime);
+            }
+
+            await this.ScaleTo(1.0, 50, Easing.CubicOut);
+
+            if (!e.Canceled)
+            {
+                if (Command != null)
+                {
+                    Command.Execute(CommandParameter);
+                }
+            }
+        }
+
+        private async void TapGestureRecoginizer_TouchDown(object sender, TouchDownEventArgs e)
+        {
+            _downTime = DateTime.Now;
+
+            await this.ScaleTo(0.9, 50, Easing.CubicOut);
         }
 
         #endregion Constructors
@@ -182,24 +209,6 @@ namespace Myco
             set
             {
                 SetValue(VerticalTextAlignmentProperty, value);
-            }
-        }
-
-        private ICommand TransitionCommand
-        {
-            get
-            {
-                return new Command(async () =>
-                {
-                    await this.ScaleTo(0.9, 50, Easing.CubicOut);
-                    await Task.Delay(100);
-                    await this.ScaleTo(1, 50, Easing.CubicOut);
-
-                    if (Command != null)
-                    {
-                        Command.Execute(CommandParameter);
-                    }
-                });
             }
         }
 

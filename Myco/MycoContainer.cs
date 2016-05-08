@@ -61,7 +61,7 @@ namespace Myco
 
         #region Methods
 
-        void IMycoController.GetGestureRecognizers(Point gestureStart, IList<Tuple<MycoView, MycoGestureRecognizer>> matches)
+        void IMycoController.GetGestureRecognizers(Point gestureStart, IList<Tuple<MycoView, IMycoGestureRecognizerController>> matches)
         {
             if (Content != null)
             {

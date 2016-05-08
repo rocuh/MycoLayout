@@ -9,7 +9,7 @@ namespace Myco
     {
         #region Methods
 
-        void GetGestureRecognizers(Point gestureStart, IList<Tuple<MycoView, MycoGestureRecognizer>> matches);
+        void GetGestureRecognizers(Point gestureStart, IList<Tuple<MycoView, IMycoGestureRecognizerController>> matches);
         
         void SendSurfaceSize(int width, int height);
 

@@ -162,7 +162,7 @@ namespace Myco
             bindable.SetValue(RowSpanProperty, value);
         }
 
-        public override void GetGestureRecognizers(Point gestureStart, IList<Tuple<MycoView, MycoGestureRecognizer>> matches)
+        public override void GetGestureRecognizers(Point gestureStart, IList<Tuple<MycoView, IMycoGestureRecognizerController>> matches)
         {
             base.GetGestureRecognizers(gestureStart, matches);
 

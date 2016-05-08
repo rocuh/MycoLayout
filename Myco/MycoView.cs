@@ -460,13 +460,13 @@ namespace Myco
             }
         }
 
-        public virtual void GetGestureRecognizers(Point gestureStart, IList<Tuple<MycoView, MycoGestureRecognizer>> matches)
+        public virtual void GetGestureRecognizers(Point gestureStart, IList<Tuple<MycoView, IMycoGestureRecognizerController>> matches)
         {
             if (RenderBounds.Contains(gestureStart))
             {
                 foreach (var gesture in _gestureRecognizers)
                 {
-                    matches.Add(new Tuple<MycoView, MycoGestureRecognizer>(this, gesture));
+                    matches.Add(new Tuple<MycoView, IMycoGestureRecognizerController>(this, gesture));
                 }
             }
         }

@@ -2,7 +2,7 @@
 
 namespace Myco
 {
-    public class MycoPanGestureRecognizer : MycoGestureRecognizer
+    public class MycoPanGestureRecognizer : MycoGestureRecognizer, IMycoPanGestureRecognizerController
     {
         #region Fields
 
@@ -25,7 +25,7 @@ namespace Myco
 
         #region Methods
 
-        public void SendPanCancelled(MycoView view)
+        void IMycoPanGestureRecognizerController.SendPanCancelled(MycoView view)
         {
             if (PanCancelled != null)
             {
@@ -33,7 +33,7 @@ namespace Myco
             }
         }
 
-        public void SendPanCompleted(MycoView view)
+        void IMycoPanGestureRecognizerController.SendPanCompleted(MycoView view)
         {
             if (PanCompleted != null)
             {
@@ -41,7 +41,7 @@ namespace Myco
             }
         }
 
-        public void SendPanStarted(MycoView view)
+        void IMycoPanGestureRecognizerController.SendPanStarted(MycoView view)
         {
             _lastOffsetX = 0;
             _lastOffsetY = 0;
@@ -52,7 +52,7 @@ namespace Myco
             }
         }
 
-        public void SendPanUpdatedWithOffset(MycoView view, double offsetX, double offsetY)
+        void IMycoPanGestureRecognizerController.SendPanUpdatedWithOffset(MycoView view, double offsetX, double offsetY)
         {
             if (PanUpdated != null)
             {
@@ -63,7 +63,7 @@ namespace Myco
             _lastOffsetY = offsetY;
         }
 
-        public void SendPanUpdatedWithUpdate(MycoView view, double updateX, double updateY)
+        void IMycoPanGestureRecognizerController.SendPanUpdatedWithUpdate(MycoView view, double updateX, double updateY)
         {
             if (PanUpdated != null)
             {
@@ -72,6 +72,15 @@ namespace Myco
         }
 
         #endregion Methods
+    }
+
+    public interface IMycoPanGestureRecognizerController
+    {
+        void SendPanCancelled(MycoView view);
+        void SendPanCompleted(MycoView view);
+        void SendPanStarted(MycoView view);  
+        void SendPanUpdatedWithOffset(MycoView view, double offsetX, double offsetY);
+        void SendPanUpdatedWithUpdate(MycoView view, double updateX, double updateY);
     }
 
     public class PanEventArgs : EventArgs

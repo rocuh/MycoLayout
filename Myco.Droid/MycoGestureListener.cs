@@ -11,16 +11,14 @@ namespace Myco.Droid
         #region Fields
 
         private static int ScrollThreshold = 30;
-
-
         private static int SwipeThreshold = 50;
         private static int SwipeVelocityThreshold = 50;
 
         private IMycoController _container;
         private Context _context;
 
-        private MycoView _activePanView;
-        private MycoPanGestureRecognizer _activePanGesture;
+        private MycoView _activeGestureView;
+        private IMycoGestureRecognizerController _activeGesture;
 
         #endregion Fields
 
@@ -54,11 +52,11 @@ namespace Myco.Droid
 
         public override bool OnDown(MotionEvent e)
         {
-            var gestureRecognizers = new List<Tuple<MycoView, MycoGestureRecognizer>>();
+            var gestureRecognizers = new List<Tuple<MycoView, IMycoGestureRecognizerController>>();
 
             _container.GetGestureRecognizers(new Xamarin.Forms.Point(_context.FromPixels(e.GetX()), _context.FromPixels(e.GetY())), gestureRecognizers);
-
-            bool gestureHandled = false;
+            
+            bool gestureHandled = false;                      
 
             foreach (var gestureRecognizer in gestureRecognizers)
             {
@@ -69,13 +67,22 @@ namespace Myco.Droid
                     if (tapGesture.NumberOfTapsRequired == 1)
                     {
                         gestureHandled = true;
+                        _activeGestureView = gestureRecognizer.Item1;
+                        _activeGesture = gestureRecognizer.Item2;
                     }
                 }
                 else
                 {
                     // pan and swipe always handle
                     gestureHandled = true;
+                    _activeGestureView = gestureRecognizer.Item1;
+                    _activeGesture = gestureRecognizer.Item2;
                 }
+            }
+
+            if (_activeGesture != null)
+            {
+                _activeGesture.SendTouchDown(_activeGestureView, _context.FromPixels(e.GetX()) - _activeGestureView.RenderBounds.X, _context.FromPixels(e.GetY()) - _activeGestureView.RenderBounds.Y);
             }
 
             return gestureHandled;
@@ -89,28 +96,33 @@ namespace Myco.Droid
             var point1 = new Xamarin.Forms.Point(e1.GetX(), e1.GetY());
             var point2 = new Xamarin.Forms.Point(e2.GetX(), e2.GetY());
 
-            if (_activePanGesture == null && Math.Abs(point1.Distance(point2)) > ScrollThreshold)
+            if (!(_activeGesture is IMycoPanGestureRecognizerController) && Math.Abs(point1.Distance(point2)) > ScrollThreshold)
             {
-                var gestureRecognizers = new List<Tuple<MycoView, MycoGestureRecognizer>>();
+                var gestureRecognizers = new List<Tuple<MycoView, IMycoGestureRecognizerController>>();
 
                 _container.GetGestureRecognizers(new Xamarin.Forms.Point(_context.FromPixels(e1.GetX()), _context.FromPixels(e1.GetY())), gestureRecognizers);
 
                 foreach (var gestureRecognizer in gestureRecognizers)
                 {
-                    var panGesture = gestureRecognizer.Item2 as MycoPanGestureRecognizer;
+                    var panGesture = gestureRecognizer.Item2 as IMycoPanGestureRecognizerController;
 
                     if (panGesture != null)
                     {
-                        _activePanView = gestureRecognizer.Item1;
-                        _activePanGesture = panGesture;
+                        if (_activeGesture != null && _activeGesture != panGesture)
+                        {
+                            _activeGesture.SendTouchUp(_activeGestureView, _context.FromPixels(e2.GetX()) - _activeGestureView.RenderBounds.X, _context.FromPixels(e2.GetY()) - _activeGestureView.RenderBounds.Y, true);
+                        }
+
+                        _activeGestureView = gestureRecognizer.Item1;
+                        _activeGesture = panGesture as IMycoGestureRecognizerController;
                         panGesture.SendPanStarted(gestureRecognizer.Item1);
                         gestureHandled = true;
                     }
                 }
             }
-            else if (_activePanGesture != null)
+            else if (_activeGesture is IMycoPanGestureRecognizerController)
             {
-                _activePanGesture.SendPanUpdatedWithUpdate(_activePanView, _context.FromPixels(distanceX), _context.FromPixels(distanceY));
+                (_activeGesture as IMycoPanGestureRecognizerController).SendPanUpdatedWithUpdate(_activeGestureView, _context.FromPixels(distanceX), _context.FromPixels(distanceY));
                 gestureHandled = true;
             }
 
@@ -119,7 +131,7 @@ namespace Myco.Droid
 
         public override bool OnFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY)
         {
-            var gestureRecognizers = new List<Tuple<MycoView, MycoGestureRecognizer>>();
+            var gestureRecognizers = new List<Tuple<MycoView, IMycoGestureRecognizerController>>();
 
             _container.GetGestureRecognizers(new Xamarin.Forms.Point(_context.FromPixels(e1.GetX()), _context.FromPixels(e1.GetY())), gestureRecognizers);
 
@@ -136,7 +148,7 @@ namespace Myco.Droid
                     {
                         foreach (var gestureRecognizer in gestureRecognizers)
                         {
-                            var swipeGesture = gestureRecognizer.Item2 as MycoSwipeGestureRecognizer;
+                            var swipeGesture = gestureRecognizer.Item2 as IMycoSwipeGestureRecognizerController;
 
                             if (swipeGesture != null)
                             {
@@ -149,7 +161,7 @@ namespace Myco.Droid
                     {
                         foreach (var gestureRecognizer in gestureRecognizers)
                         {
-                            var swipeGesture = gestureRecognizer.Item2 as MycoSwipeGestureRecognizer;
+                            var swipeGesture = gestureRecognizer.Item2 as IMycoSwipeGestureRecognizerController;
 
                             if (swipeGesture != null)
                             {
@@ -166,7 +178,9 @@ namespace Myco.Droid
 
         public override bool OnSingleTapUp(MotionEvent e)
         {
-            var gestureRecognizers = new List<Tuple<MycoView, MycoGestureRecognizer>>();
+            HandleUp(e);
+
+            var gestureRecognizers = new List<Tuple<MycoView, IMycoGestureRecognizerController>>();
 
             _container.GetGestureRecognizers(new Xamarin.Forms.Point(_context.FromPixels(e.GetX()), _context.FromPixels(e.GetY())), gestureRecognizers);
 
@@ -174,7 +188,7 @@ namespace Myco.Droid
 
             foreach (var gestureRecognizer in gestureRecognizers)
             {
-                var tapGesture = gestureRecognizer.Item2 as MycoTapGestureRecognizer;
+                var tapGesture = gestureRecognizer.Item2 as IMycoTapGestureRecognizerController;
 
                 if (tapGesture != null && tapGesture.NumberOfTapsRequired == 1)
                 {
@@ -186,19 +200,33 @@ namespace Myco.Droid
             return gestureHandled;
         }
 
-        public bool OnUp(MotionEvent e)
+        private bool HandleUp(MotionEvent e)
         {
-            if (_activePanGesture != null)
+            if (_activeGesture != null)
             {
-                _activePanGesture.SendPanCompleted(_activePanView);
+                var point = new Xamarin.Forms.Point(_context.FromPixels(e.GetX()) - _activeGestureView.RenderBounds.X, _context.FromPixels(e.GetY()));
 
-                _activePanGesture = null;
-                _activePanView = null;
+                var isCanceled = !_activeGestureView.RenderBounds.Contains(point);
+
+                _activeGesture.SendTouchUp(_activeGestureView, _context.FromPixels(e.GetX()) - _activeGestureView.RenderBounds.X, _context.FromPixels(e.GetY()) - _activeGestureView.RenderBounds.Y, isCanceled);
+
+                if (_activeGesture is IMycoPanGestureRecognizerController)
+                {
+                    (_activeGesture as IMycoPanGestureRecognizerController).SendPanCompleted(_activeGestureView);
+                }
+
+                _activeGesture = null;
+                _activeGestureView = null;
 
                 return true;
             }
 
             return false;
+        }
+
+        public bool OnUp(MotionEvent e)
+        {
+            return HandleUp(e);
         }
 
         #endregion Methods

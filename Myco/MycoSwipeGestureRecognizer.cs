@@ -4,7 +4,7 @@ using Xamarin.Forms;
 
 namespace Myco
 {
-    public class MycoSwipeGestureRecognizer : MycoGestureRecognizer
+    public class MycoSwipeGestureRecognizer : MycoGestureRecognizer, IMycoSwipeGestureRecognizerController
     {
         #region Fields
 
@@ -77,7 +77,7 @@ namespace Myco
 
         #region Methods
 
-        public void SendSwipeLeft(MycoView view)
+        void IMycoSwipeGestureRecognizerController.SendSwipeLeft(MycoView view)
         {
             if (SwipeLeftCommand != null)
             {
@@ -88,7 +88,7 @@ namespace Myco
                 SwipeLeft(view, new EventArgs());
         }
 
-        public void SendSwipeRight(MycoView view)
+        void IMycoSwipeGestureRecognizerController.SendSwipeRight(MycoView view)
         {
             if (SwipeRightCommand != null)
             {
@@ -100,5 +100,11 @@ namespace Myco
         }
 
         #endregion Methods
+    }
+
+    public interface IMycoSwipeGestureRecognizerController
+    {
+        void SendSwipeLeft(MycoView view);
+        void SendSwipeRight(MycoView view);
     }
 }

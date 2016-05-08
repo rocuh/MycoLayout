@@ -4,7 +4,7 @@ using Xamarin.Forms;
 
 namespace Myco
 {
-    public class MycoTapGestureRecognizer : MycoGestureRecognizer
+    public class MycoTapGestureRecognizer : MycoGestureRecognizer, IMycoTapGestureRecognizerController
     {
         #region Fields
 
@@ -62,7 +62,7 @@ namespace Myco
 
         #region Methods
 
-        public void SendTapped(MycoView view, double x, double y)
+        void IMycoTapGestureRecognizerController.SendTapped(MycoView view, double x, double y)
         {
             if (Command != null)
             {
@@ -74,6 +74,12 @@ namespace Myco
         }
 
         #endregion Methods
+    }
+
+    public interface IMycoTapGestureRecognizerController
+    {
+        int NumberOfTapsRequired { get; }
+        void SendTapped(MycoView view, double x, double y);
     }
 
     public class TapEventArgs : EventArgs
