@@ -4,13 +4,16 @@ using Xamarin.Forms;
 
 namespace Myco
 {
-    public class MycoTapGestureRecognizer : MycoGestureRecognizer, IMycoTapGestureRecognizerController
+    public class MycoTapGestureRecognizer : MycoGestureRecognizer
     {
         #region Fields
 
+        private const int TapMaximum = 500;
+
         public static readonly BindableProperty CommandParameterProperty = BindableProperty.Create(nameof(CommandParameter), typeof(object), typeof(MycoTapGestureRecognizer), null);
         public static readonly BindableProperty CommandProperty = BindableProperty.Create(nameof(Command), typeof(ICommand), typeof(MycoTapGestureRecognizer), null);
-        public static readonly BindableProperty NumberOfTapsRequiredProperty = BindableProperty.Create(nameof(NumberOfTapsRequired), typeof(int), typeof(MycoTapGestureRecognizer), 1);
+
+        private DateTime _downTime;
 
         #endregion Fields
 
@@ -46,40 +49,33 @@ namespace Myco
             }
         }
 
-        public int NumberOfTapsRequired
-        {
-            get
-            {
-                return (int)GetValue(NumberOfTapsRequiredProperty);
-            }
-            set
-            {
-                SetValue(NumberOfTapsRequiredProperty, value);
-            }
-        }
-
         #endregion Properties
 
         #region Methods
 
-        void IMycoTapGestureRecognizerController.SendTapped(MycoView view, double x, double y)
+        protected override void OnTouchDown(MycoView view, double x, double y)
         {
-            if (Command != null)
-            {
-                Command.Execute(CommandParameter);
-            }
+            base.OnTouchDown(view, x, y);
+            _downTime = DateTime.Now;
+        }
 
-            if (Tapped != null)
-                Tapped(view, new TapEventArgs(x, y));
+        protected override void OnTouchUp(MycoView view, double x, double y, bool canceled)
+        {
+            base.OnTouchUp(view, x, y, canceled);
+
+            if ((DateTime.Now - _downTime).TotalMilliseconds < TapMaximum && !canceled)
+            {
+                if (Command != null)
+                {
+                    Command.Execute(CommandParameter);
+                }
+
+                if (Tapped != null)
+                    Tapped(view, new TapEventArgs(x, y));
+            }
         }
 
         #endregion Methods
-    }
-
-    public interface IMycoTapGestureRecognizerController
-    {
-        int NumberOfTapsRequired { get; }
-        void SendTapped(MycoView view, double x, double y);
     }
 
     public class TapEventArgs : EventArgs

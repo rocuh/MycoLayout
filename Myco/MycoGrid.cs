@@ -259,7 +259,7 @@ namespace Myco
                 var rowSpan = GetRowSpan(child);
                 var columnSpan = GetColumnSpan(child);
 
-                double columnLeft = rectangle.Left, rowTop = rectangle.Top, columnRight = 0, rowBottom = 0;
+                double columnLeft = Padding.Left, rowTop = Padding.Top, columnRight = 0, rowBottom = 0;
 
                 for (int c = 0; c < column; c++)
                 {
@@ -438,11 +438,11 @@ namespace Myco
                     }
                 }
 
+                columnHasContent[column] = size.Height > 0;
+
                 // determine autosize widths and heights
                 for (int c = column; c < column + columnSpan; c++)
                 {
-                    columnHasContent[c] = true;
-
                     if (ColumnDefinitions[c].Width.IsAuto && allAutoSizeColunn)
                     {
                         columnWidths[c] = Math.Max(columnWidths[c], Double.IsPositiveInfinity(size.Width) ? 0 : (size.Width / columnSpan));
@@ -459,10 +459,10 @@ namespace Myco
                     }
                 }
 
+                rowHasContent[row] = size.Width > 0;
+
                 for (int r = row; r < row + rowSpan; r++)
                 {
-                    rowHasContent[r] = true;
-
                     if (RowDefinitions[r].Height.IsAuto && allAutoSizeRow)
                     {
                         rowHeights[r] = Math.Max(rowHeights[r], Double.IsPositiveInfinity(size.Height) ? 0 : (size.Height / rowSpan));

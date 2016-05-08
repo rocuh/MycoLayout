@@ -9,6 +9,9 @@ namespace Myco
     {
         #region Fields
 
+        public static readonly BindableProperty FrameColorProperty = BindableProperty.Create(nameof(FrameColor), typeof(Color), typeof(MycoView), Color.Transparent);
+        public static readonly BindableProperty FrameThicknessProperty = BindableProperty.Create(nameof(FrameThickness), typeof(double), typeof(MycoView), 0.0);
+
         public static readonly BindableProperty IsClippedToBoundsProperty = BindableProperty.Create(nameof(IsClippedToBounds), typeof(bool), typeof(MycoView), false, BindingMode.OneWay);
         public static readonly BindableProperty BackgroundColorProperty = BindableProperty.Create(nameof(BackgroundColor), typeof(Color), typeof(MycoView), Color.Transparent);                
         public static readonly BindableProperty HorizontalOptionsProperty = BindableProperty.Create(nameof(HorizontalOptions), typeof(LayoutOptions), typeof(MycoView), LayoutOptions.Fill);
@@ -34,7 +37,7 @@ namespace Myco
         public static readonly BindableProperty HeightProperty = HeightPropertyKey.BindableProperty;
 
         public static readonly BindableProperty OpacityProperty = BindableProperty.Create(nameof(OpacityProperty), typeof(double), typeof(MycoView), 1.0);
-
+                
         private readonly List<MycoGestureRecognizer> _gestureRecognizers = new List<MycoGestureRecognizer>();
         private MycoContainer _container;
         private MycoView _parent;
@@ -57,6 +60,18 @@ namespace Myco
             }
         }
 
+        public Color FrameColor
+        {
+            get
+            {
+                return (Color)GetValue(FrameColorProperty);
+            }
+            set
+            {
+                SetValue(FrameColorProperty, value);
+            }
+        }
+
         public Rectangle Bounds
         {
             get
@@ -75,6 +90,18 @@ namespace Myco
             set
             {
                 _container = value;
+            }
+        }
+
+        public double FrameThickness
+        {
+            get
+            {
+                return (double)GetValue(FrameThicknessProperty);
+            }
+            set
+            {
+                SetValue(FrameThicknessProperty, value);
             }
         }
 
@@ -213,7 +240,7 @@ namespace Myco
             {
                 if (Parent != null)
                 {
-                    return X + Parent.X;
+                    return X + Parent.InheritedX;
                 }
 
                 return 0;
@@ -226,7 +253,7 @@ namespace Myco
             {
                 if (Parent != null)
                 {
-                    return Y + Parent.Y;
+                    return Y + Parent.InheritedY;
                 }
 
                 return 0;
@@ -445,14 +472,22 @@ namespace Myco
 
         protected virtual void InternalDraw(SKCanvas canvas)
         {
-            if (BackgroundColor.A > 0)
+            using (var paint = new SKPaint())
             {
-                using (var paint = new SKPaint())
+                if (BackgroundColor.A > 0)
                 {
                     paint.Color = BackgroundColor.ToSKColor();
                     canvas.DrawRect(RenderBounds.ToSKRect(), paint);
                 }
-            }
+
+                if (FrameColor.A > 0)
+                {
+                    paint.Color = FrameColor.ToSKColor();
+                    paint.IsStroke = true;
+                    paint.StrokeWidth = (float) FrameThickness;
+                    canvas.DrawRect(RenderBounds.ToSKRect(), paint);
+                }
+            }        
 
             if (Drawing != null)
             {
@@ -504,7 +539,29 @@ namespace Myco
             if (!IsVisible)
                 return new Size(0, 0);
 
-            return InternalSizeRequest(widthConstraint, heightConstaint);
+            if (!Double.IsPositiveInfinity(widthConstraint))
+            {
+                widthConstraint = Math.Max(0, widthConstraint - (Margin.Left + Margin.Right));
+            }
+
+            if (!Double.IsPositiveInfinity(heightConstaint))
+            {
+                heightConstaint = Math.Max(0, heightConstaint - (Margin.Top + Margin.Bottom));
+            }
+
+            var result = InternalSizeRequest(widthConstraint, heightConstaint);
+
+            if (!Double.IsPositiveInfinity(result.Width))
+            {
+                result.Width += Margin.Left + Margin.Right;
+            }
+
+            if (!Double.IsPositiveInfinity(result.Height))
+            {
+                result.Height += Margin.Top + Margin.Bottom;
+            }
+
+            return result;
         }
 
         protected virtual void InternalLayout(Rectangle rectangle)
@@ -518,7 +575,7 @@ namespace Myco
         protected virtual Size InternalSizeRequest(double widthConstraint, double heightConstaint)
         {
             return new Size(
-                WidthRequest >= 0 ? (Double.IsPositiveInfinity(widthConstraint) ? WidthRequest : Math.Min(WidthRequest, widthConstraint)) : widthConstraint,
+                WidthRequest >= 0 ? (Double.IsPositiveInfinity(widthConstraint) ? WidthRequest  : Math.Min(WidthRequest, widthConstraint)) : widthConstraint,
                 HeightRequest >= 0 ? (Double.IsPositiveInfinity(heightConstaint) ? HeightRequest : Math.Min(HeightRequest, heightConstaint)) : heightConstaint);
         }
 

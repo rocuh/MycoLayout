@@ -8,16 +8,26 @@ namespace Myco
         public event EventHandler<TouchDownEventArgs> TouchDown;
         public event EventHandler<TouchUpEventArgs> TouchUp;
 
-        void IMycoGestureRecognizerController.SendTouchDown(MycoView view, double x, double y)
+        protected virtual void OnTouchDown(MycoView view, double x, double y)
         {
             if (TouchDown != null)
                 TouchDown(view, new TouchDownEventArgs(x, y));
         }
 
-        void IMycoGestureRecognizerController.SendTouchUp(MycoView view, double x, double y, bool canceled)
+        protected virtual void OnTouchUp(MycoView view, double x, double y, bool canceled)
         {
             if (TouchUp != null)
                 TouchUp(view, new TouchUpEventArgs(x, y, canceled));
+        }
+
+        void IMycoGestureRecognizerController.SendTouchDown(MycoView view, double x, double y)
+        {
+            OnTouchDown(view, x, y);
+        }
+
+        void IMycoGestureRecognizerController.SendTouchUp(MycoView view, double x, double y, bool canceled)
+        {
+            OnTouchUp(view, x, y, canceled);
         }
     }
 

@@ -6,6 +6,7 @@ using Foundation;
 using UIKit;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.iOS;
+using System.Linq;
 
 [assembly: ExportRenderer(typeof(Myco.MycoContainer), typeof(Myco.iOS.MycoContainerRenderer))]
 
@@ -15,12 +16,12 @@ namespace Myco.iOS
     {
         #region Fields
 
+        private UILongPressGestureRecognizer _longPressGesture;
         private UISwipeGestureRecognizer _swipeGestureLeft;
         private UISwipeGestureRecognizer _swipeGestureRight;
-        private UITapGestureRecognizer _tapGesture;
         private UIPanGestureRecognizer _panGesture;
-        private MycoView _activeGestureView;
-        private IMycoGestureRecognizerController _activeGesture;
+
+        private List<Tuple<MycoView, IMycoGestureRecognizerController>> _activeGestures = new List<Tuple<MycoView, IMycoGestureRecognizerController>>();
 
         #endregion Fields
 
@@ -39,76 +40,6 @@ namespace Myco.iOS
             DependencyService.Register<IMycoImageSource, MycoImageSource>();
         }
 
-        public override void TouchesBegan(NSSet touches, UIEvent evt)
-        {
-            base.TouchesBegan(touches, evt);
-
-            var gestureRecognizers = new List<Tuple<MycoView, IMycoGestureRecognizerController>>();
-
-            var touch = touches.AnyObject as UITouch;
-
-            var location = touch.LocationInView(Control);
-
-            (Element as IMycoController).GetGestureRecognizers(new Xamarin.Forms.Point(location.X, location.Y), gestureRecognizers);
-            
-            foreach (var gestureRecognizer in gestureRecognizers)
-            {
-                var tapGesture = gestureRecognizer.Item2 as MycoTapGestureRecognizer;
-
-                if (tapGesture != null)
-                {
-                    if (tapGesture.NumberOfTapsRequired == 1)
-                    {
-                        _activeGestureView = gestureRecognizer.Item1;
-                        _activeGesture = gestureRecognizer.Item2;
-                    }
-                }
-                else
-                {
-                    _activeGestureView = gestureRecognizer.Item1;
-                    _activeGesture = gestureRecognizer.Item2;
-                }
-            }
-
-            if (_activeGesture != null)
-            {
-                _activeGesture.SendTouchDown(_activeGestureView, location.X - _activeGestureView.RenderBounds.X, location.Y - _activeGestureView.RenderBounds.Y);
-            }
-        }
-
-        public override void TouchesEnded(NSSet touches, UIEvent evt)
-        {
-            base.TouchesEnded(touches, evt);
-
-            if (_activeGesture != null)
-            {
-                var touch = touches.AnyObject as UITouch;
-                var location = touch.LocationInView(Control);
-                var isCanceled = !_activeGestureView.RenderBounds.Contains(new Xamarin.Forms.Point(location.X, location.Y));
-
-                _activeGesture.SendTouchUp(_activeGestureView, location.X - _activeGestureView.RenderBounds.X, location.Y- _activeGestureView.RenderBounds.Y, isCanceled);
-                
-                _activeGesture = null;
-                _activeGestureView = null;
-            }
-        }
-
-        public override void TouchesCancelled(NSSet touches, UIEvent evt)
-        {
-            base.TouchesCancelled(touches, evt);
-
-            if (_activeGesture != null)
-            {
-                var touch = touches.AnyObject as UITouch;
-                var location = touch.LocationInView(Control);
-
-                _activeGesture.SendTouchUp(_activeGestureView, location.X - _activeGestureView.RenderBounds.X, location.Y - _activeGestureView.RenderBounds.Y, true);
-
-                _activeGesture = null;
-                _activeGestureView = null;
-            }
-        }
-
         protected override void OnElementChanged(ElementChangedEventArgs<MycoContainer> e)
         {
             base.OnElementChanged(e);
@@ -118,34 +49,36 @@ namespace Myco.iOS
                 var nativeSkContainer = new NativeMycoContainer();
                 SetNativeControl(nativeSkContainer);
 
-                _tapGesture = new UITapGestureRecognizer(HandleTap);
-                _tapGesture.ShouldReceiveTouch += ValidateTouch;
-                AddGestureRecognizer(_tapGesture);
-
+                _longPressGesture = new UILongPressGestureRecognizer(HandlePress);
+                _longPressGesture.MinimumPressDuration = 0.0f;
+                _longPressGesture.ShouldReceiveTouch += ValidateTouch;
+                
                 _swipeGestureLeft = new UISwipeGestureRecognizer(HandleSwipe);
                 _swipeGestureLeft.Direction = UISwipeGestureRecognizerDirection.Left;
                 _swipeGestureLeft.ShouldReceiveTouch += ValidateTouch;
-                AddGestureRecognizer(_swipeGestureLeft);
 
                 _swipeGestureRight = new UISwipeGestureRecognizer(HandleSwipe);
                 _swipeGestureRight.Direction = UISwipeGestureRecognizerDirection.Right;
                 _swipeGestureRight.ShouldReceiveTouch += ValidateTouch;
+                
+                _panGesture = new UIPanGestureRecognizer(HandlePan);
+                _panGesture.DelaysTouchesBegan = false;
+                _panGesture.ShouldReceiveTouch += ValidateTouch;
+
+                _longPressGesture.ShouldRecognizeSimultaneously = (gesture1, gesture2) => true;
+                _swipeGestureLeft.ShouldRecognizeSimultaneously = (gesture1, gesture2) => true;
+                _swipeGestureRight.ShouldRecognizeSimultaneously = (gesture1, gesture2) => true;
+                _panGesture.ShouldRecognizeSimultaneously = (gesture1, gesture2) => true;
+
+                AddGestureRecognizer(_panGesture);
+                AddGestureRecognizer(_longPressGesture);
+                AddGestureRecognizer(_swipeGestureLeft);
                 AddGestureRecognizer(_swipeGestureRight);
 
-                _panGesture = new UIPanGestureRecognizer(HandlePan);
-                _panGesture.ShouldReceiveTouch += ValidateTouch;
-                AddGestureRecognizer(_panGesture);
             }
 
             if (e.NewElement == null)
             {
-                if (_tapGesture != null)
-                {
-                    _tapGesture.ShouldReceiveTouch -= ValidateTouch;
-                    RemoveGestureRecognizer(_tapGesture);
-                    _tapGesture = null;
-                }
-
                 if (_swipeGestureLeft != null)
                 {
                     _swipeGestureLeft.ShouldReceiveTouch -= ValidateTouch;
@@ -242,22 +175,36 @@ namespace Myco.iOS
             }
         }
 
-        private void HandleTap(UITapGestureRecognizer tap)
+        private void HandlePress(UILongPressGestureRecognizer press)
         {
-            var gestureRecognizers = new List<Tuple<MycoView, IMycoGestureRecognizerController>>();
+            var location = press.LocationInView(Control);
 
-            var location = tap.LocationInView(Control);
-
-            (Element as IMycoController).GetGestureRecognizers(new Xamarin.Forms.Point(location.X, location.Y), gestureRecognizers);
-
-            foreach (var gestureRecognizer in gestureRecognizers)
+            switch (press.State)
             {
-                var tapGesture = gestureRecognizer.Item2 as IMycoTapGestureRecognizerController;
+                case UIGestureRecognizerState.Began:
+                    var gestureRecognizers = new List<Tuple<MycoView, IMycoGestureRecognizerController>>();
 
-                if (tapGesture != null && tapGesture.NumberOfTapsRequired == 1)
-                {
-                    tapGesture.SendTapped(gestureRecognizer.Item1, location.X - gestureRecognizer.Item1.RenderBounds.X, location.Y - -gestureRecognizer.Item1.RenderBounds.Y);
-                }
+                    (Element as IMycoController).GetGestureRecognizers(new Xamarin.Forms.Point(location.X, location.Y), gestureRecognizers);
+
+                    _activeGestures.Clear();
+
+                    foreach (var gesture in gestureRecognizers)
+                    {
+                        gesture.Item2.SendTouchDown(gesture.Item1, location.X - gesture.Item1.RenderBounds.X, location.Y - gesture.Item1.RenderBounds.Y);
+                        _activeGestures.Add(gesture);
+                    }
+                    break;
+                case UIGestureRecognizerState.Failed:
+                case UIGestureRecognizerState.Cancelled:
+                case UIGestureRecognizerState.Ended:
+                    foreach (var gesture in _activeGestures)
+                    {
+                        var isCanceled = !gesture.Item1.RenderBounds.Contains(new Xamarin.Forms.Point(location.X, location.Y));
+                        gesture.Item2.SendTouchUp(gesture.Item1, location.X - gesture.Item1.RenderBounds.X, location.Y - gesture.Item1.RenderBounds.Y, isCanceled);
+                    }
+
+                    _activeGestures.Clear();
+                    break;
             }
         }
 
@@ -273,25 +220,17 @@ namespace Myco.iOS
 
             foreach (var gestureRecognizer in gestureRecognizers)
             {
-                if (gesture is UITapGestureRecognizer)
-                {
-                    var tapGesture = gestureRecognizer.Item2 as MycoTapGestureRecognizer;
-
-                    if (tapGesture != null)
-                    {
-                        if (tapGesture.NumberOfTapsRequired == 1)
-                        {
-                            gestureHandled = true;
-                        }
-                    }
-                }
-                else if (gesture is UISwipeGestureRecognizer)
+                if (gesture is UISwipeGestureRecognizer)
                 {
                    gestureHandled |= gestureRecognizer.Item2 is MycoSwipeGestureRecognizer;
                 }
                 else if (gesture is UIPanGestureRecognizer)
                 {
                    gestureHandled |= gestureRecognizer.Item2 is MycoPanGestureRecognizer;
+                }
+                else if (gesture is UILongPressGestureRecognizer)
+                {
+                    gestureHandled |= gestureRecognizer.Item2 is MycoTapGestureRecognizer;
                 }
             }
 

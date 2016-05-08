@@ -1,8 +1,8 @@
-﻿using System.Threading.Tasks;
-using System.Windows.Input;
-using SkiaSharp;
-using Xamarin.Forms;
+﻿using SkiaSharp;
 using System;
+using System.Threading.Tasks;
+using System.Windows.Input;
+using Xamarin.Forms;
 
 namespace Myco
 {
@@ -56,10 +56,10 @@ namespace Myco
             });
 
         private const int MinimumDownTime = 250;
+        private DateTime _downTime;
         private SKTypeface _typeFace;
         private FontAttributes _typeFaceFontAttributes;
         private string _typeFaceFontFamily;
-        private DateTime _downTime;
 
         #endregion Fields
 
@@ -71,33 +71,6 @@ namespace Myco
             tapGestureRecoginizer.TouchDown += TapGestureRecoginizer_TouchDown;
             tapGestureRecoginizer.TouchUp += TapGestureRecoginizer_TouchUp;
             GestureRecognizers.Add(tapGestureRecoginizer);
-        }
-
-        private async void TapGestureRecoginizer_TouchUp(object sender, TouchUpEventArgs e)
-        {
-            int waitTime = MinimumDownTime - (int) (DateTime.Now - _downTime).TotalMilliseconds;
-
-            if (waitTime > 0 && waitTime <= MinimumDownTime)
-            {
-                await Task.Delay(waitTime);
-            }
-
-            await this.ScaleTo(1.0, 50, Easing.CubicOut);
-
-            if (!e.Canceled)
-            {
-                if (Command != null)
-                {
-                    Command.Execute(CommandParameter);
-                }
-            }
-        }
-
-        private async void TapGestureRecoginizer_TouchDown(object sender, TouchDownEventArgs e)
-        {
-            _downTime = DateTime.Now;
-
-            await this.ScaleTo(0.9, 50, Easing.CubicOut);
         }
 
         #endregion Constructors
@@ -214,35 +187,7 @@ namespace Myco
 
         #endregion Properties
 
-        private SKTypeface GetTypeface()
-        {
-            if (_typeFace == null || _typeFaceFontFamily != FontFamily || _typeFaceFontAttributes != FontAttributes)
-            {
-                SKTypefaceStyle style = SKTypefaceStyle.Normal;
-
-                switch (FontAttributes)
-                {
-                    case FontAttributes.None:
-                        style = SKTypefaceStyle.Normal;
-                        break;
-
-                    case FontAttributes.Bold:
-                        style = SKTypefaceStyle.Bold;
-                        break;
-
-                    case FontAttributes.Italic:
-                        style = SKTypefaceStyle.Italic;
-                        break;
-                }
-
-                _typeFace = SKTypeface.FromFamilyName(FontFamily == null ? Device.OnPlatform("Helvetica", "sans-serif", "Arial") : FontFamily, style);
-
-                _typeFaceFontFamily = FontFamily;
-                _typeFaceFontAttributes = FontAttributes;
-            }
-
-            return _typeFace;
-        }
+        #region Methods
 
         protected override void InternalDraw(SKCanvas canvas)
         {
@@ -300,5 +245,64 @@ namespace Myco
                 }
             }
         }
+
+        private SKTypeface GetTypeface()
+        {
+            if (_typeFace == null || _typeFaceFontFamily != FontFamily || _typeFaceFontAttributes != FontAttributes)
+            {
+                SKTypefaceStyle style = SKTypefaceStyle.Normal;
+
+                switch (FontAttributes)
+                {
+                    case FontAttributes.None:
+                        style = SKTypefaceStyle.Normal;
+                        break;
+
+                    case FontAttributes.Bold:
+                        style = SKTypefaceStyle.Bold;
+                        break;
+
+                    case FontAttributes.Italic:
+                        style = SKTypefaceStyle.Italic;
+                        break;
+                }
+
+                _typeFace = SKTypeface.FromFamilyName(FontFamily == null ? Device.OnPlatform("Helvetica", "sans-serif", "Arial") : FontFamily, style);
+
+                _typeFaceFontFamily = FontFamily;
+                _typeFaceFontAttributes = FontAttributes;
+            }
+
+            return _typeFace;
+        }
+
+        private async void TapGestureRecoginizer_TouchDown(object sender, TouchDownEventArgs e)
+        {
+            _downTime = DateTime.Now;
+
+            await this.ScaleTo(0.9, 50, Easing.CubicOut);
+        }
+
+        private async void TapGestureRecoginizer_TouchUp(object sender, TouchUpEventArgs e)
+        {
+            int waitTime = MinimumDownTime - (int)(DateTime.Now - _downTime).TotalMilliseconds;
+
+            if (waitTime > 0 && waitTime <= MinimumDownTime)
+            {
+                await Task.Delay(waitTime);
+            }
+
+            await this.ScaleTo(1.0, 50, Easing.CubicOut);
+
+            if (!e.Canceled)
+            {
+                if (Command != null)
+                {
+                    Command.Execute(CommandParameter);
+                }
+            }
+        }
+
+        #endregion Methods
     }
 }

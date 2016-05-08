@@ -127,7 +127,7 @@ namespace Myco
         {
             if (Content != null)
             {
-                Content.Layout(new Rectangle(0,0, Bounds.Width, Bounds.Height));
+                Content.Layout(new Rectangle(0, 0, Bounds.Width, Bounds.Height));
             }
         }
 
