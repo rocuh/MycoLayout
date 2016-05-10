@@ -196,10 +196,8 @@ namespace Myco
             double[] rowSpacing;
 
             // adjust available size
-            rectangle.Left += Padding.Left;
-            rectangle.Top += Padding.Top;
-            rectangle.Width -= (Padding.Right + Padding.Left);
-            rectangle.Height -= (Padding.Bottom + Padding.Top);
+            var internalWidth = rectangle.Width - (Padding.Right + Padding.Left);
+            var internalHeight = rectangle.Height - (Padding.Bottom + Padding.Top);
 
             // get minimum size the grid can fit into
             CalculateRowColumns(out columnWidths, out rowHeights, out columnSpacing, out rowSpacing, out embeddedWidth, out embeddedHeight);
@@ -226,8 +224,8 @@ namespace Myco
             }
 
             // determine how much is left for the percentage based columns and rows
-            var widthAutoSize = (rectangle.Width - totalPercentColumnSpacing) - embeddedWidth;
-            var heightAutoSize = (rectangle.Height - totalPercentRowSpacing) - embeddedHeight;
+            var widthAutoSize = (internalWidth - totalPercentColumnSpacing) - embeddedWidth;
+            var heightAutoSize = (internalHeight - totalPercentRowSpacing) - embeddedHeight;
 
             var totalStarWidths = GetTotalStarWidths();
 
@@ -367,7 +365,7 @@ namespace Myco
             embeddedWidth += Padding.Left + Padding.Right;
             embeddedHeight += Padding.Top + Padding.Bottom;
 
-            return new Size(Double.IsPositiveInfinity(size.Width) ? embeddedWidth : size.Width, Double.IsPositiveInfinity(size.Height) ? embeddedHeight : size.Height);
+            return new Size(Double.IsPositiveInfinity(size.Width) ? embeddedWidth : Math.Min(embeddedWidth, size.Width), Double.IsPositiveInfinity(size.Height) ? embeddedHeight : Math.Min(embeddedHeight, size.Height));
         }
 
         protected override void OnBindingContextChanged()

@@ -8,11 +8,12 @@ namespace Myco
     {
         #region Fields
 
-        private const int TapMaximum = 500;
-
         public static readonly BindableProperty CommandParameterProperty = BindableProperty.Create(nameof(CommandParameter), typeof(object), typeof(MycoTapGestureRecognizer), null);
         public static readonly BindableProperty CommandProperty = BindableProperty.Create(nameof(Command), typeof(ICommand), typeof(MycoTapGestureRecognizer), null);
-
+        private const int TapMaximum = 500;
+        private const int TapMaxMovement = 50;
+        private const int TapMinimum = 20;
+        private Point _downTapLocation;
         private DateTime _downTime;
 
         #endregion Fields
@@ -57,13 +58,18 @@ namespace Myco
         {
             base.OnTouchDown(view, x, y);
             _downTime = DateTime.Now;
+            _downTapLocation = new Point(x, y);
         }
 
         protected override void OnTouchUp(MycoView view, double x, double y, bool canceled)
         {
             base.OnTouchUp(view, x, y, canceled);
 
-            if ((DateTime.Now - _downTime).TotalMilliseconds < TapMaximum && !canceled)
+            var point = new Point(x, y);
+
+            var totalTapTime = (DateTime.Now - _downTime).TotalMilliseconds;
+
+            if (totalTapTime > TapMinimum && totalTapTime < TapMaximum && point.Distance(_downTapLocation) < TapMaxMovement && !canceled)
             {
                 if (Command != null)
                 {

@@ -10,8 +10,14 @@ namespace Myco
     {
         #region Fields
 
+        public static readonly BindableProperty IsCheckableProperty = BindableProperty.Create(nameof(IsCheckable), typeof(bool), typeof(MycoCheckImage), false,
+           propertyChanged: (bindableObject, oldValue, newValue) =>
+           {
+               ((MycoCheckImage)bindableObject).Invalidate();
+           });
+
         public static readonly BindableProperty IsSelectedProperty = BindableProperty.Create(nameof(IsSelected), typeof(bool), typeof(MycoCheckImage), false,
-           defaultBindingMode: BindingMode.TwoWay,
+                   defaultBindingMode: BindingMode.TwoWay,
            propertyChanged: (bindableObject, oldValue, newValue) =>
            {
                ((MycoCheckImage)bindableObject).Invalidate();
@@ -75,6 +81,18 @@ namespace Myco
         #endregion Constructors
 
         #region Properties
+
+        public bool IsCheckable
+        {
+            get
+            {
+                return (bool)GetValue(IsCheckableProperty);
+            }
+            set
+            {
+                SetValue(IsCheckableProperty, value);
+            }
+        }
 
         public bool IsSelected
         {
@@ -147,20 +165,27 @@ namespace Myco
                 var smallestSize = Math.Min(renderBounds.Size.Width, renderBounds.Size.Height);
                 var square = new Rectangle(renderBounds.Center.X - smallestSize / 2.0, renderBounds.Center.Y - smallestSize / 2.0, smallestSize, smallestSize);
 
-                paint.Color = SelectionBackgroundColor.ToSKColor();
+                Rectangle imageBounds = renderBounds;
+
                 paint.IsAntialias = true;
-                canvas.DrawOval(square.ToSKRect(), paint);
 
-                var darkerOutline = SelectionBackgroundColor.AddLuminosity(-0.1);
-                paint.IsStroke = true;
-                paint.Color = darkerOutline.ToSKColor();
-                paint.StrokeWidth = 2.0f;
-
-                canvas.DrawOval(square.ToSKRect(), paint);
-
-                if (Drawable != null)
+                if (IsCheckable)
                 {
-                    var imageBounds = renderBounds.Inflate(-BorderSize, -BorderSize);
+                    paint.Color = SelectionBackgroundColor.ToSKColor();
+                    canvas.DrawOval(square.ToSKRect(), paint);
+
+                    var darkerOutline = SelectionBackgroundColor.AddLuminosity(-0.1);
+                    paint.IsStroke = true;
+                    paint.Color = darkerOutline.ToSKColor();
+                    paint.StrokeWidth = 1.0f;
+
+                    canvas.DrawOval(square.ToSKRect(), paint);
+
+                    imageBounds = renderBounds.Inflate(-BorderSize, -BorderSize);
+                }
+
+                if (Drawable != null && !IsSelected)
+                {
                     var drawableSize = Drawable.GetSize(imageBounds.Width, imageBounds.Height);
 
                     double ratioX = (double)imageBounds.Width / (double)drawableSize.Width;
@@ -178,13 +203,11 @@ namespace Myco
                     Drawable.Draw(canvas, new Rectangle(cx, cy, newWidth, newHeight), paint);
                 }
 
-                if (IsSelected)
+                if (IsCheckable && IsSelected)
                 {
                     paint.Color = SelectionColor.ToSKColor();
                     paint.IsStroke = false;
                     canvas.DrawOval(square.ToSKRect(), paint);
-
-                    var imageBounds = renderBounds.Inflate(-BorderSize, -BorderSize);
 
                     double ratioX = (double)imageBounds.Width / (double)TickBitmap.Width;
                     double ratioY = (double)imageBounds.Height / (double)TickBitmap.Height;
